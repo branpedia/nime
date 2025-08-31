@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimeStream - Streaming Anime Sub Indo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">
+                    <i class="fas fa-play-circle"></i> AnimeStream
+                </a>
+                <form class="search-form" id="search-form">
+                    <input type="text" placeholder="Cari anime..." id="search-input">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+        </div>
+    </header>
+    
+    <nav>
+        <div class="container">
+            <ul class="nav-menu">
+                <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="#ongoing" class="active"><i class="fas fa-play-circle"></i> Ongoing</a></li>
+                <li><a href="/search"><i class="fas fa-search"></i> Cari Anime</a></li>
+                <li><a href="#"><i class="fas fa-calendar"></i> Jadwal</a></li>
+                <li><a href="#"><i class="fas fa-tags"></i> Genre</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="container">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Streaming Anime Subtitle Indonesia</h1>
+                <p>Nikmati koleksi anime terlengkap dengan kualitas terbaik dan subtitle Indonesia.</p>
+                <a href="#ongoing" class="btn">Lihat Anime Terbaru</a>
+            </div>
+        </section>
+        
+        <h2 class="section-title" id="ongoing"><i class="fas fa-fire"></i> Anime Ongoing</h2>
+        <div class="anime-grid" id="ongoing-anime">
+            <div class="loader">
+                <i class="fas fa-spinner"></i>
+                <p>Memuat anime...</p>
+            </div>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <button class="page-btn" id="prev-page" disabled><i class="fas fa-chevron-left"></i> Sebelumnya</button>
+            <span id="page-info">Halaman 1</span>
+            <button class="page-btn" id="next-page">Berikutnya <i class="fas fa-chevron-right"></i></button>
+        </div>
+        
+        <h2 class="section-title"><i class="fas fa-search"></i> Hasil Pencarian</h2>
+        <div class="anime-grid" id="search-results">
+            <p class="no-results">Gunakan form pencarian di atas untuk mencari anime.</p>
+        </div>
+    </main>
+    
+    <!-- Modal untuk Detail Anime -->
+    <div class="modal" id="anime-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-modal">&times;</button>
+            <div class="anime-detail" id="anime-detail">
+                <!-- Konten akan diisi oleh JavaScript -->
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Tentang Kami</h3>
+                    <p>AnimeStream menyediakan layanan streaming anime dengan subtitle Indonesia. Website ini mengambil data langsung dari OtakuDesu.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Disclaimer</h3>
+                    <p>Semua konten anime yang disediakan di website ini adalah hak cipta dari pemiliknya masing-masing. Kami hanya menyediakan informasi dan link streaming.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Kontak</h3>
+                    <p>Jika ada link rusak atau masalah lainnya, silakan hubungi kami melalui email: admin@anime-stream.com</p>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 AnimeStream. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE = window.location.origin;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchForm = document.getElementById('search-form');
+            const searchInput = document.getElementById('search-input');
+            const ongoingAnime = document.getElementById('ongoing-anime');
+            const searchResults = document.getElementById('search-results');
+            const animeModal = document.getElementById('anime-modal');
+            const closeModal = document.getElementById('close-modal');
+            const animeDetail = document.getElementById('anime-detail');
+            const prevPageBtn = document.getElementById('prev-page');
+            const nextPageBtn = document.getElementById('next-page');
+            const pageInfo = document.getElementById('page-info');
+            
+            let currentPage = 1;
+            let totalPages = 1;
+            
+            // Fungsi untuk memuat anime ongoing
+            async function loadOngoingAnime(page = 1) {
+                try {
+                    ongoingAnime.innerHTML = '<div class="loader"><i class="fas fa-spinner"></i><p>Memuat anime...</p></div>';
+                    
+                    const response = await fetch(`${API_BASE}/api/ongoing?page=${page}`);
+                    const data = await response.json();
+                    
+                    if (!data.success) {
+                        throw new Error(data.error);
+                    }
+                    
+                    renderOngoingAnime(data.data.anime);
+                    
+                    // Update pagination
+                    totalPages = data.data.pagination.totalPages;
+                    updatePagination();
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    ongoingAnime.innerHTML = `<p class="error">Gagal memuat anime: ${error.message}</p>`;
+                }
+            }
+            
+            // Fungsi untuk mencari anime
+            async function searchAnime(query) {
+                try {
+                    searchResults.innerHTML = '<div class="loader"><i class="fas fa-spinner"></i><p>Mencari anime...</p></div>';
+                    
+                    const response = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(query)}`);
+                    const data = await response.json();
+                    
+                    if (!data.success) {
+                        throw new Error(data.error);
+                    }
+                    
+                    renderSearchResults(data.data);
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    searchResults.innerHTML = `<p class="error">Gagal mencari anime: ${error.message}</p>`;
+                }
+            }
+            
+            // Fungsi untuk mendapatkan detail anime
+            async function getAnimeDetail(animeId) {
+                try {
+                    animeModal.style.display = 'block';
+                    animeDetail.innerHTML = '<div class="loader"><i class="fas fa-spinner"></i><p>Memuat detail anime...</p></div>';
+                    
+                    const response = await fetch(`${API_BASE}/api/anime/${animeId}`);
+                    const data = await response.json();
+                    
+                    if (!data.success) {
+                        throw new Error(data.error);
+                    }
+                    
+                    showAnimeDetail(data.data);
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    animeDetail.innerHTML = `<p class="error">Gagal memuat detail anime: ${error.message}</p>`;
+                }
+            }
+            
+            // Render ongoing anime
+            function renderOngoingAnime(animeList) {
+                ongoingAnime.innerHTML = '';
+                
+                if (animeList.length === 0) {
+                    ongoingAnime.innerHTML = '<p class="no-results">Tidak ada anime ongoing ditemukan.</p>';
+                    return;
+                }
+                
+                animeList.forEach(anime => {
+                    const animeCard = document.createElement('div');
+                    animeCard.className = 'anime-card';
+                    animeCard.innerHTML = `
+                        <div class="anime-thumb">
+                            <img src="${anime.image}" alt="${anime.title}" onerror="this.src='https://via.placeholder.com/200x280/1a1a2e/e94560?text=Gambar+Tidak+Tersedia'">
+                            <div class="episode-badge">${anime.episode}</div>
+                        </div>
+                        <div class="anime-info">
+                            <h3 class="anime-title">${anime.title}</h3>
+                            <div class="anime-details">
+                                <span><i class="far fa-calendar-alt"></i> ${anime.day}</span>
+                                <span><i class="fas fa-play-circle"></i> ${anime.episode}</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    animeCard.addEventListener('click', () => {
+                        getAnimeDetail(anime.id);
+                    });
+                    
+                    ongoingAnime.appendChild(animeCard);
+                });
+            }
+            
+            // Render hasil pencarian
+            function renderSearchResults(results) {
+                searchResults.innerHTML = '';
+                
+                if (results.length === 0) {
+                    searchResults.innerHTML = '<p class="no-results">Tidak ada hasil ditemukan.</p>';
+                    return;
+                }
+                
+                results.forEach(anime => {
+                    const animeCard = document.createElement('div');
+                    animeCard.className = 'anime-card';
+                    animeCard.innerHTML = `
+                        <div class="anime-thumb">
+                            <img src="${anime.image}" alt="${anime.title}" onerror="this.src='https://via.placeholder.com/200x280/1a1a2e/e94560?text=Gambar+Tidak+Tersedia'">
+                        </div>
+                        <div class="anime-info">
+                            <h3 class="anime-title">${anime.title}</h3>
+                            <div class="anime-details">
+                                <p><b>Genres</b>: ${anime.genres.join(', ')}</p>
+                                <p><b>Status</b>: ${anime.status}</p>
+                                <p><b>Rating</b>: ${anime.rating}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    animeCard.addEventListener('click', () => {
+                        getAnimeDetail(anime.id);
+                    });
+                    
+                    searchResults.appendChild(animeCard);
+                });
+            }
+            
+            // Tampilkan detail anime
+            function showAnimeDetail(anime) {
+                animeDetail.innerHTML = `
+                    <div class="anime-detail-img">
+                        <img src="${anime.image}" alt="${anime.title}" onerror="this.src='https://via.placeholder.com/300x400/1a1a2e/e94560?text=Gambar+Tidak+Tersedia'">
+                    </div>
+                    <div class="anime-detail-info">
+                        <h2 class="anime-detail-title">${anime.title}</h2>
+                        <div class="anime-detail-meta">
+                            <div class="meta-item">
+                                <h4>Status</h4>
+                                <p>${anime.status}</p>
+                            </div>
+                            <div class="meta-item">
+                                <h4>Rating</h4>
+                                <p>${anime.score}</p>
+                            </div>
+                            <div class="meta-item">
+                                <h4>Tayang</h4>
+                                <p>${anime.aired}</p>
+                            </div>
+                            <div class="meta-item">
+                                <h4>Total Episode</h4>
+                                <p>${anime.episode}</p>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <h4>Sinopsis</h4>
+                            <p>${anime.synopsis || 'Tidak ada sinopsis tersedia.'}</p>
+                        </div>
+                        <div class="meta-item">
+                            <h4>Genre</h4>
+                            <p>${anime.genre.join(', ') || 'Tidak ada genre tersedia.'}</p>
+                        </div>
+                        <div class="episode-list">
+                            <h3>Daftar Episode</h3>
+                            ${anime.episodes.length > 0 ? anime.episodes.map(ep => `
+                                <div class="episode-item">
+                                    <a href="#">Episode ${ep.number} - ${ep.title}</a>
+                                    <span>${ep.date}</span>
+                                    <a href="${ep.url}" class="play-btn" target="_blank"><i class="fas fa-play"></i> Tonton</a>
+                                </div>
+                            `).join('') : '<p>Tidak ada episode tersedia.</p>'}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Update tampilan pagination
+            function updatePagination() {
+                pageInfo.textContent = `Halaman ${currentPage} dari ${totalPages}`;
+                prevPageBtn.disabled = currentPage === 1;
+                nextPageBtn.disabled = currentPage === totalPages;
+            }
+            
+            // Event listeners
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const query = searchInput.value.trim();
+                
+                if (query === '') return;
+                
+                searchAnime(query);
+            });
+            
+            closeModal.addEventListener('click', function() {
+                animeModal.style.display = 'none';
+            });
+            
+            window.addEventListener('click', function(e) {
+                if (e.target === animeModal) {
+                    animeModal.style.display = 'none';
+                }
+            });
+            
+            prevPageBtn.addEventListener('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadOngoingAnime(currentPage);
+                }
+            });
+            
+            nextPageBtn.addEventListener('click', function() {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    loadOngoingAnime(currentPage);
+                }
+            });
+            
+            // Inisialisasi
+            loadOngoingAnime();
+        });
+    </script>
+</body>
+</html>
