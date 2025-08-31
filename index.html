@@ -283,6 +283,16 @@
             100% { transform: rotate(360deg); }
         }
         
+        /* Error Message */
+        .error-message {
+            background: #ff4757;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
         /* Footer */
         footer {
             background: #1a1a2e;
@@ -358,6 +368,11 @@
             <p>Sedang memuat data...</p>
         </div>
         
+        <!-- Error Message -->
+        <div id="error-message" class="error-message" style="display: none;">
+            Terjadi kesalahan saat memuat data. Silakan coba lagi.
+        </div>
+        
         <!-- Search Results Section -->
         <div id="search-results" class="search-results">
             <h2 class="section-title">Hasil Pencarian</h2>
@@ -424,6 +439,7 @@
         const animeDetailSection = document.getElementById('anime-detail');
         const videoPlayerSection = document.getElementById('video-player');
         const loadingIndicator = document.getElementById('loading');
+        const errorMessage = document.getElementById('error-message');
         
         const detailTitle = document.getElementById('detail-title');
         const detailImg = document.getElementById('detail-img');
@@ -455,6 +471,7 @@
         // Functions
         function showLoading() {
             loadingIndicator.style.display = 'block';
+            errorMessage.style.display = 'none';
             searchResultsSection.style.display = 'none';
             animeDetailSection.style.display = 'none';
             videoPlayerSection.style.display = 'none';
@@ -462,6 +479,11 @@
         
         function hideLoading() {
             loadingIndicator.style.display = 'none';
+        }
+        
+        function showError(message) {
+            errorMessage.textContent = message || 'Terjadi kesalahan saat memuat data. Silakan coba lagi.';
+            errorMessage.style.display = 'block';
         }
         
         async function performSearch() {
@@ -472,101 +494,234 @@
             
             try {
                 // In a real implementation, this would call your server API
-                // For demo purposes, we'll simulate the API call
-                const searchResults = await simulateSearchAPI(query);
+                const searchResults = await fetchSearchResults(query);
                 displaySearchResults(searchResults);
             } catch (error) {
                 console.error('Search error:', error);
-                resultsContainer.innerHTML = '<p>Terjadi kesalahan saat mencari anime.</p>';
+                showError('Terjadi kesalahan saat mencari anime. Silakan coba lagi.');
             } finally {
                 hideLoading();
+            }
+        }
+        
+        // Fetch search results from the backend API
+        async function fetchSearchResults(query) {
+            try {
+                // This would be your actual API endpoint in production
+                const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                return await response.json();
+            } catch (error) {
+                // Fallback to simulated data if API is not available
+                console.warn('API not available, using simulated data:', error);
+                return simulateSearchAPI(query);
             }
         }
         
         // Simulate API call (replace with actual API call in production)
         async function simulateSearchAPI(query) {
             // This is a simulation - in a real app, you would fetch from your backend API
-            // which would handle the scraping from Otakudesu
+            
+            // Sample data structure based on the HTML you provided for "Bad Girl"
+            const sampleData = {
+                "bad girl": [
+                    {
+                        id: 'bad-girl-sub-indo',
+                        title: 'Bad Girl',
+                        image: 'https://otakudesu.best/wp-content/uploads/2025/07/Bad-Girl.jpg',
+                        genres: ['Comedy', 'School'],
+                        status: 'Ongoing',
+                        rating: '6.91',
+                        episodeCount: 0, // Will be updated from detail
+                        url: 'https://otakudesu.best/anime/bad-girl-sub-indo/'
+                    },
+                    {
+                        id: 'ungirl-murder-sub-indo',
+                        title: 'Undead Girl Murder Farce',
+                        image: 'https://otakudesu.best/wp-content/uploads/2023/10/Undead-Girl-Murder-Farce-Sub-Indo.jpg',
+                        genres: ['Detective', 'Fantasy', 'Historical', 'Mystery', 'Supernatural', 'Vampire'],
+                        status: 'Completed',
+                        rating: '7.93',
+                        episodeCount: 13,
+                        url: 'https://otakudesu.best/anime/ungirl-murder-sub-indo/'
+                    },
+                    {
+                        id: 'school-fleet-subtitle-indonesia',
+                        title: 'High School Fleet BD',
+                        image: 'https://otakudesu.best/wp-content/uploads/2018/01/High-School-Fleet-Sub-Indo.jpg',
+                        genres: ['Action', 'Military', 'School'],
+                        status: 'Completed',
+                        rating: '7.33',
+                        episodeCount: 12,
+                        url: 'https://otakudesu.best/anime/school-fleet-subtitle-indonesia/'
+                    }
+                ],
+                "gotoubun no hanayome": [
+                    {
+                        id: 'gotobun-hanayome-subtitle-indonesia',
+                        title: 'Gotoubun no Hanayome',
+                        image: 'https://otakudesu.best/wp-content/uploads/2019/01/Gotoubun-no-Hanayome-Sub-Indo.jpg',
+                        genres: ['Comedy', 'Harem', 'Romance', 'School', 'Shounen'],
+                        status: 'Completed',
+                        rating: '7.67',
+                        episodeCount: 12,
+                        url: 'https://otakudesu.best/anime/gotobun-hanayome-subtitle-indonesia/'
+                    },
+                    {
+                        id: 'gotoubun-hanayome-season-2-sub-indo',
+                        title: 'Gotoubun no Hanayome Season 2',
+                        image: 'https://otakudesu.best/wp-content/uploads/2021/01/gotoubun-no-hanayome-s2.jpg',
+                        genres: ['Comedy', 'Harem', 'Romance', 'School', 'Shounen'],
+                        status: 'Completed',
+                        rating: '8.16',
+                        episodeCount: 12,
+                        url: 'https://otakudesu.best/anime/gotoubun-hanayome-season-2-sub-indo/'
+                    }
+                ]
+            };
             
             return new Promise(resolve => {
                 setTimeout(() => {
-                    // Sample data structure
-                    const results = [
-                        {
-                            id: 'gotobun-hanayome-subtitle-indonesia',
-                            title: 'Gotoubun no Hanayome',
-                            image: 'https://otakudesu.best/wp-content/uploads/2019/01/Gotoubun-no-Hanayome-Sub-Indo.jpg',
-                            genres: ['Comedy', 'Harem', 'Romance', 'School', 'Shounen'],
-                            status: 'Completed',
-                            rating: '7.67',
-                            episodeCount: 12,
-                            url: 'https://otakudesu.best/anime/gotobun-hanayome-subtitle-indonesia/'
-                        },
-                        {
-                            id: 'gotoubun-hanayome-season-2-sub-indo',
-                            title: 'Gotoubun no Hanayome Season 2',
-                            image: 'https://otakudesu.best/wp-content/uploads/2021/01/gotoubun-no-hanayome-s2.jpg',
-                            genres: ['Comedy', 'Harem', 'Romance', 'School', 'Shounen'],
-                            status: 'Completed',
-                            rating: '8.16',
-                            episodeCount: 12,
-                            url: 'https://otakudesu.best/anime/gotoubun-hanayome-season-2-sub-indo/'
+                    // Find the best matching query
+                    const normalizedQuery = query.toLowerCase();
+                    let results = [];
+                    
+                    // Check for exact matches first
+                    if (sampleData[normalizedQuery]) {
+                        results = sampleData[normalizedQuery];
+                    } else {
+                        // Check for partial matches
+                        for (const key in sampleData) {
+                            if (normalizedQuery.includes(key) || key.includes(normalizedQuery)) {
+                                results = [...results, ...sampleData[key]];
+                            }
                         }
-                    ];
+                    }
                     
-                    // Filter results based on query
-                    const filteredResults = results.filter(anime => 
-                        anime.title.toLowerCase().includes(query.toLowerCase())
-                    );
-                    
-                    resolve(filteredResults);
+                    // If no results found, return empty array
+                    resolve(results.length > 0 ? results : []);
                 }, 1000);
             });
         }
         
         async function fetchAnimeDetail(animeId) {
-            // This would call your backend API in a real implementation
+            try {
+                // This would be your actual API endpoint in production
+                const response = await fetch(`/api/anime/${encodeURIComponent(animeId)}`);
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                return await response.json();
+            } catch (error) {
+                // Fallback to simulated data if API is not available
+                console.warn('API not available, using simulated data:', error);
+                return simulateAnimeDetailAPI(animeId);
+            }
+        }
+        
+        // Simulate API call for anime details
+        async function simulateAnimeDetailAPI(animeId) {
+            // Sample data based on anime IDs
+            const sampleDetails = {
+                'bad-girl-sub-indo': {
+                    id: 'bad-girl-sub-indo',
+                    title: 'Bad Girl',
+                    japanese: 'バッドガール',
+                    image: 'https://otakudesu.best/wp-content/uploads/2025/07/Bad-Girl.jpg',
+                    score: '6.91',
+                    producer: '-',
+                    type: 'TV',
+                    status: 'Ongoing',
+                    totalEpisodes: 0, // Ongoing, unknown total
+                    duration: '24 Menit',
+                    releaseDate: 'Jul 2025',
+                    studio: 'Unknown',
+                    genres: ['Comedy', 'School'],
+                    synopsis: 'Cerita tentang seorang gadis yang dianggap "bad girl" di sekolahnya, namun sebenarnya memiliki hati yang baik. Dia melalui berbagai petualangan dan tantangan dalam kehidupan sekolahnya.',
+                    episodes: [
+                        { number: 1, title: 'Episode 1', date: '20 Juli,2025', url: 'https://otakudesu.best/episode/bad-girl-episode-1-sub-indo/' }
+                    ]
+                },
+                'ungirl-murder-sub-indo': {
+                    id: 'ungirl-murder-sub-indo',
+                    title: 'Undead Girl Murder Farce',
+                    japanese: 'アンデッドガール・マーダーファルス',
+                    image: 'https://otakudesu.best/wp-content/uploads/2023/10/Undead-Girl-Murder-Farce-Sub-Indo.jpg',
+                    score: '7.93',
+                    producer: '-',
+                    type: 'TV',
+                    status: 'Completed',
+                    totalEpisodes: 13,
+                    duration: '24 Menit',
+                    releaseDate: 'Jul 2023',
+                    studio: 'Lapin Track',
+                    genres: ['Detective', 'Fantasy', 'Historical', 'Mystery', 'Supernatural', 'Vampire'],
+                    synopsis: 'Sebuah seri misteri yang mengikuti detektif yang menyelidiki kasus-kasus yang melibatkan makhluk supernatural di era Meiji.',
+                    episodes: [
+                        { number: 13, title: 'Episode 13 (End)', date: '28 September,2023', url: 'https://otakudesu.best/episode/undead-girl-murder-farce-episode-13-sub-indo/' },
+                        { number: 12, title: 'Episode 12', date: '21 September,2023', url: 'https://otakudesu.best/episode/undead-girl-murder-farce-episode-12-sub-indo/' },
+                        { number: 11, title: 'Episode 11', date: '14 September,2023', url: 'https://otakudesu.best/episode/undead-girl-murder-farce-episode-11-sub-indo/' },
+                        // Add more episodes as needed
+                    ]
+                },
+                'gotobun-hanayome-subtitle-indonesia': {
+                    id: 'gotobun-hanayome-subtitle-indonesia',
+                    title: 'Gotoubun no Hanayome',
+                    japanese: '五等分の花嫁',
+                    image: 'https://otakudesu.best/wp-content/uploads/2019/01/Gotoubun-no-Hanayome-Sub-Indo.jpg',
+                    score: '7.67',
+                    producer: '-',
+                    type: 'TV',
+                    status: 'Completed',
+                    totalEpisodes: 12,
+                    duration: '24 Menit',
+                    releaseDate: 'Jan 11, 2019',
+                    studio: 'Tezuka Productions',
+                    genres: ['Comedy', 'Harem', 'Romance', 'School', 'Shounen'],
+                    synopsis: 'Fuutarou Uesugi merupakan siswa cerdas namun memiliki hidup yang sulit. Fuutarou selalu menyendiri dan fokus terhadap belajar, tidak memiliki ibu serta teman, keluarganya dililit banyak hutang, bahkan ia dan adiknya seringkali merasa kelaparan. Oleh karena itu, kesempatan yang muncul di depannya tak akan ia lepaskan. Ia dimintai oleh seseorang untuk menjadi guru les dengan bayaran yang tinggi. Dan ternyata murid yang harus Fuutarou ajari satu sekolah dengan dirinya. Dan terlebih lagi, ia harus mengajar untuk kakak beradik kembar 5 yang memiliki sifat berbeda-beda, mereka tidak suka belajar dan memiliki nilai yang sangat rendah serta berkesempatan besar untuk tidak naik kelas. Sebagian dari mereka ada yang menolak untuk diajari bahkan mengusir Fuutarou. Hal tersebut membuat pekerjaan paruh waktunya menjadi rumit & sulit. Namun Fuutarou tak pantang menyerah, ia bersikeras untuk menjadi pengajar mereka karena dirinya sangat membutuhkan bayaran tersebut. Apa yang harus dia lakukan agar kelima gadis cantik tersebut dapat lulus? rencana apakah yang akan dilakukan oleh Fuutarou?',
+                    episodes: [
+                        { number: 12, title: 'Episode 12 (End)', date: '28 Maret,2019', url: 'https://otakudesu.best/episode/gth-episode-12-sub-indo/' },
+                        { number: 11, title: 'Episode 11', date: '21 Maret,2019', url: 'https://otakudesu.best/episode/gth-episode-11-sub-indo/' },
+                        { number: 10, title: 'Episode 10', date: '14 Maret,2019', url: 'https://otakudesu.best/episode/gth-episode-10-sub-indo/' },
+                        // Add more episodes as needed
+                    ]
+                }
+            };
+            
             return new Promise(resolve => {
                 setTimeout(() => {
-                    // Sample data
-                    const detail = {
-                        id: animeId,
-                        title: 'Gotoubun no Hanayome',
-                        japanese: '五等分の花嫁',
-                        image: 'https://otakudesu.best/wp-content/uploads/2019/01/Gotoubun-no-Hanayome-Sub-Indo.jpg',
-                        score: '7.67',
-                        producer: '-',
-                        type: 'TV',
-                        status: 'Completed',
-                        totalEpisodes: 12,
-                        duration: '24 Menit',
-                        releaseDate: 'Jan 11, 2019',
-                        studio: 'Tezuka Productions',
-                        genres: ['Comedy', 'Harem', 'Romance', 'School', 'Shounen'],
-                        synopsis: 'Fuutarou Uesugi merupakan siswa cerdas namun memiliki hidup yang sulit. Fuutarou selalu menyendiri dan fokus terhadap belajar, tidak memiliki ibu serta teman, keluarganya dililit banyak hutang, bahkan ia dan adiknya seringkali merasa kelaparan. Oleh karena itu, kesempatan yang muncul di depannya tak akan ia lepaskan. Ia dimintai oleh seseorang untuk menjadi guru les dengan bayaran yang tinggi. Dan ternyata murid yang harus Fuutarou ajari satu sekolah dengan dirinya. Dan terlebih lagi, ia harus mengajar untuk kakak beradik kembar 5 yang memiliki sifat berbeda-beda, mereka tidak suka belajar dan memiliki nilai yang sangat rendah serta berkesempatan besar untuk tidak naik kelas. Sebagian dari mereka ada yang menolak untuk diajari bahkan mengusir Fuutarou. Hal tersebut membuat pekerjaan paruh waktunya menjadi rumit & sulit. Namun Fuutarou tak pantang menyerah, ia bersikeras untuk menjadi pengajar mereka karena dirinya sangat membutuhkan bayaran tersebut. Apa yang harus dia lakukan agar kelima gadis cantik tersebut dapat lulus? rencana apakah yang akan dilakukan oleh Fuutarou?',
-                        episodes: [
-                            { number: 1, title: 'Episode 1', date: '18 Agustus,2019', url: 'https://otakudesu.best/episode/gth-episode-1-sub-indo/' },
-                            { number: 2, title: 'Episode 2', date: '18 Agustus,2019', url: 'https://otakudesu.best/episode/gth-episode-2-sub-indo/' },
-                            { number: 3, title: 'Episode 3', date: '18 Agustus,2019', url: 'https://otakudesu.best/episode/gth-episode-3-sub-indo/' },
-                            { number: 4, title: 'Episode 4', date: '18 Agustus,2019', url: 'https://otakudesu.best/episode/gth-episode-4-sub-indo/' },
-                            { number: 5, title: 'Episode 5', date: '18 Agustus,2019', url: 'https://otakudesu.best/episode/gth-episode-5-sub-indo/' },
-                            { number: 6, title: 'Episode 6', date: '18 Agustus,2019', url: 'https://otakudesu.best/episode/gth-episode-6-sub-indo/' },
-                            { number: 7, title: 'Episode 7', date: '18 Agustus,2019', url: 'https://otakudesu.best/episode/gth-episode-7-sub-indo/' },
-                            { number: 8, title: 'Episode 8', date: '18 Agustus,2019', url: 'https://otakudesu.best/episode/gth-episode-8-sub-indo/' },
-                            { number: 9, title: 'Episode 9', date: '18 Agustus,2019', url: 'https://otakudesu.best/episode/gth-episode-9-sub-indo/' },
-                            { number: 10, title: 'Episode 10', date: '18 Agustus,2019', url: 'https://otakudesu.best/episode/gth-episode-10-sub-indo/' },
-                            { number: 11, title: 'Episode 11', date: '18 Agustus,2019', url: 'https://otakudesu.best/episode/gth-episode-11-sub-indo/' },
-                            { number: 12, title: 'Episode 12 (End)', date: '18 Agustus,2019', url: 'https://otakudesu.best/episode/gth-episode-12-sub-indo/' }
-                        ]
-                    };
-                    
-                    resolve(detail);
+                    // Return the anime detail or empty object if not found
+                    resolve(sampleDetails[animeId] || {});
                 }, 1000);
             });
         }
         
         async function fetchStreamingUrl(episodeUrl) {
-            // This would call your backend API in a real implementation
+            try {
+                // This would be your actual API endpoint in production
+                const response = await fetch(`/api/stream?url=${encodeURIComponent(episodeUrl)}`);
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                return data.streamingUrl;
+            } catch (error) {
+                // Fallback to simulated data if API is not available
+                console.warn('API not available, using simulated data:', error);
+                return simulateStreamingAPI(episodeUrl);
+            }
+        }
+        
+        // Simulate API call for streaming URL
+        async function simulateStreamingAPI(episodeUrl) {
             return new Promise(resolve => {
                 setTimeout(() => {
                     // Return a mock streaming URL
@@ -579,7 +734,7 @@
             resultsContainer.innerHTML = '';
             
             if (results.length === 0) {
-                resultsContainer.innerHTML = '<p>Tidak ada hasil ditemukan</p>';
+                resultsContainer.innerHTML = '<p>Tidak ada hasil ditemukan. Coba dengan kata kunci lain.</p>';
                 return;
             }
             
@@ -587,12 +742,12 @@
                 const card = document.createElement('div');
                 card.className = 'anime-card';
                 card.innerHTML = `
-                    <img src="${anime.image}" alt="${anime.title}">
+                    <img src="${anime.image}" alt="${anime.title}" onerror="this.src='https://via.placeholder.com/225x320/1a1a2e/6c63ff?text=No+Image'">
                     <div class="anime-info">
                         <div class="anime-title">${anime.title}</div>
                         <div class="anime-detail">Status: ${anime.status}</div>
                         <div class="anime-detail">Rating: ${anime.rating}</div>
-                        <div class="anime-detail">Episode: ${anime.episodeCount}</div>
+                        <div class="anime-detail">Genre: ${anime.genres.join(', ')}</div>
                     </div>
                 `;
                 
@@ -600,9 +755,14 @@
                     showLoading();
                     try {
                         const animeDetail = await fetchAnimeDetail(anime.id);
-                        showAnimeDetail(animeDetail);
+                        if (animeDetail && animeDetail.title) {
+                            showAnimeDetail(animeDetail);
+                        } else {
+                            throw new Error('Anime detail not found');
+                        }
                     } catch (error) {
                         console.error('Error fetching anime detail:', error);
+                        showError('Gagal memuat detail anime. Silakan coba lagi.');
                     } finally {
                         hideLoading();
                     }
@@ -614,53 +774,64 @@
             searchResultsSection.style.display = 'block';
             animeDetailSection.style.display = 'none';
             videoPlayerSection.style.display = 'none';
+            errorMessage.style.display = 'none';
         }
         
         function showAnimeDetail(anime) {
             currentAnime = anime;
-            currentEpisodes = anime.episodes;
+            currentEpisodes = anime.episodes || [];
             
             detailTitle.textContent = anime.title;
             detailImg.src = anime.image;
+            detailImg.onerror = function() {
+                this.src = 'https://via.placeholder.com/250x350/1a1a2e/6c63ff?text=No+Image';
+            };
             
             // Create meta info
             detailMeta.innerHTML = `
-                <span>Skor: ${anime.score}</span>
-                <span>Tipe: ${anime.type}</span>
-                <span>Status: ${anime.status}</span>
-                <span>Episode: ${anime.totalEpisodes}</span>
-                <span>Durasi: ${anime.duration}</span>
-                <span>Rilis: ${anime.releaseDate}</span>
-                <span>Studio: ${anime.studio}</span>
+                ${anime.score ? `<span>Skor: ${anime.score}</span>` : ''}
+                ${anime.type ? `<span>Tipe: ${anime.type}</span>` : ''}
+                ${anime.status ? `<span>Status: ${anime.status}</span>` : ''}
+                ${anime.totalEpisodes ? `<span>Episode: ${anime.totalEpisodes}</span>` : ''}
+                ${anime.duration ? `<span>Durasi: ${anime.duration}</span>` : ''}
+                ${anime.releaseDate ? `<span>Rilis: ${anime.releaseDate}</span>` : ''}
+                ${anime.studio ? `<span>Studio: ${anime.studio}</span>` : ''}
             `;
             
-            detailSynopsis.textContent = anime.synopsis;
+            detailSynopsis.textContent = anime.synopsis || 'Tidak ada sinopsis tersedia.';
             
             // Create episode list
             episodeContainer.innerHTML = '';
-            anime.episodes.forEach(episode => {
-                const episodeCard = document.createElement('div');
-                episodeCard.className = 'episode-card';
-                episodeCard.innerHTML = `Episode ${episode.number}`;
-                
-                episodeCard.addEventListener('click', async () => {
-                    showLoading();
-                    try {
-                        const streamingUrl = await fetchStreamingUrl(episode.url);
-                        playEpisode(episode, streamingUrl);
-                    } catch (error) {
-                        console.error('Error fetching streaming URL:', error);
-                    } finally {
-                        hideLoading();
-                    }
+            
+            if (currentEpisodes.length === 0) {
+                episodeContainer.innerHTML = '<p>Tidak ada episode tersedia.</p>';
+            } else {
+                currentEpisodes.forEach(episode => {
+                    const episodeCard = document.createElement('div');
+                    episodeCard.className = 'episode-card';
+                    episodeCard.innerHTML = `Episode ${episode.number}`;
+                    
+                    episodeCard.addEventListener('click', async () => {
+                        showLoading();
+                        try {
+                            const streamingUrl = await fetchStreamingUrl(episode.url);
+                            playEpisode(episode, streamingUrl);
+                        } catch (error) {
+                            console.error('Error fetching streaming URL:', error);
+                            showError('Gagal memuat video. Silakan coba lagi.');
+                        } finally {
+                            hideLoading();
+                        }
+                    });
+                    
+                    episodeContainer.appendChild(episodeCard);
                 });
-                
-                episodeContainer.appendChild(episodeCard);
-            });
+            }
             
             searchResultsSection.style.display = 'none';
             animeDetailSection.style.display = 'block';
             videoPlayerSection.style.display = 'none';
+            errorMessage.style.display = 'none';
         }
         
         function playEpisode(episode, streamingUrl) {
@@ -682,6 +853,7 @@
                         playEpisode(prevEpisode, streamingUrl);
                     } catch (error) {
                         console.error('Error fetching streaming URL:', error);
+                        showError('Gagal memuat video. Silakan coba lagi.');
                     } finally {
                         hideLoading();
                     }
@@ -700,6 +872,7 @@
                         playEpisode(nextEpisode, streamingUrl);
                     } catch (error) {
                         console.error('Error fetching streaming URL:', error);
+                        showError('Gagal memuat video. Silakan coba lagi.');
                     } finally {
                         hideLoading();
                     }
@@ -711,6 +884,7 @@
             searchResultsSection.style.display = 'none';
             animeDetailSection.style.display = 'none';
             videoPlayerSection.style.display = 'block';
+            errorMessage.style.display = 'none';
         }
         
         function showHomePage() {
@@ -718,10 +892,13 @@
             searchResultsSection.style.display = 'block';
             animeDetailSection.style.display = 'none';
             videoPlayerSection.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            resultsContainer.innerHTML = '<p>Gunakan kolom pencarian untuk mencari anime.</p>';
         }
         
         // Initialize with empty search results
-        resultsContainer.innerHTML = '<p>Gunakan kolom pencarian untuk mencari anime.</p>';
+        showHomePage();
     </script>
 </body>
 </html>
