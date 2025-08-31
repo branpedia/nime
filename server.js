@@ -1,26 +1,26 @@
-import express from 'express';
-import cors from 'cors';
-import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
-
+const express = require('express');
+const cors = require('cors');
+const puppeteer = require('puppeteer');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
 
-// Launch browser function dengan Chromium untuk production
+// Fungsi untuk launch browser
 async function launchBrowser() {
   return await puppeteer.launch({
-    args: process.env.NODE_ENV === 'production' ? chromium.args : [],
-    executablePath: process.env.NODE_ENV === 'production' 
-      ? await chromium.executablePath()
-      : process.platform === 'win32'
-        ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-        : process.platform === 'darwin'
-          ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-          : '/usr/bin/google-chrome',
     headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-gpu'
+    ]
   });
 }
 
@@ -41,14 +41,6 @@ app.get('/api/search', async (req, res) => {
     // Set user agent untuk menghindari deteksi bot
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
     
-    // Handle Cloudflare challenge jika ada
-    page.on('response', async (response) => {
-      if (response.url().includes('cdn-cgi/challenge-platform')) {
-        console.log('Cloudflare challenge detected, waiting...');
-        await page.waitForTimeout(5000);
-      }
-    });
-    
     console.log('Navigating to:', searchUrl);
     await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 30000 });
     
@@ -58,8 +50,8 @@ app.get('/api/search', async (req, res) => {
     const results = await page.evaluate(() => {
       const items = [];
       
-      // Cari elemen dengan class chivsrc (untuk hasil pencarian Otakudesu)
-      const listElements = document.querySelectorAll('.chivsrc li, li');
+      // Cari semua elemen li yang mengandung hasil pencarian
+      const listElements = document.querySelectorAll('li');
       
       listElements.forEach(li => {
         const titleElement = li.querySelector('h2 a');
@@ -251,6 +243,9 @@ app.get('/api/stream', async (req, res) => {
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
 });
+
+// Serve static files (frontend)
+app.use(express.static('public'));
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
