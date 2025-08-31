@@ -14,17 +14,28 @@ app.use(express.json());
 app.get('/api/search', async (req, res) => {
   try {
     const { query } = req.query;
+    if (!query) {
+      return res.status(400).json({ error: 'Query parameter is required' });
+    }
+    
     const searchUrl = `https://otakudesu.best/?s=${encodeURIComponent(query)}&post_type=anime`;
     
-    const { data } = await axios.get(searchUrl);
+    const { data } = await axios.get(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+    
     const $ = cheerio.load(data);
     
     const results = [];
     
+    // Mencari elemen yang mengandung hasil pencarian
     $('li').each((i, el) => {
-      const title = $(el).find('h2 a').text();
+      const titleElement = $(el).find('h2 a');
+      const title = titleElement.text();
       const image = $(el).find('img').attr('src');
-      const url = $(el).find('h2 a').attr('href');
+      const url = titleElement.attr('href');
       
       if (title && image && url) {
         // Extract details from the element
@@ -45,18 +56,63 @@ app.get('/api/search', async (req, res) => {
           }
         });
         
+        // Extract ID from URL
+        const id = url.split('/').filter(Boolean).pop();
+        
         results.push({
-          id: url.split('/').filter(Boolean).pop(),
+          id,
           title,
           image,
           url,
           genres,
           status,
           rating,
-          episodeCount: 0 // You might need additional logic to get this
+          episodeCount: 0 // Will be updated from detail
         });
       }
     });
+    
+    // Jika tidak ada hasil dari selector biasa, coba selector alternatif
+    if (results.length === 0) {
+      $('.chivsrc li').each((i, el) => {
+        const titleElement = $(el).find('h2 a');
+        const title = titleElement.text();
+        const image = $(el).find('img').attr('src');
+        const url = titleElement.attr('href');
+        
+        if (title && image && url) {
+          const genres = [];
+          $(el).find('.set a').each((i, genreEl) => {
+            genres.push($(genreEl).text());
+          });
+          
+          let status = '';
+          let rating = '';
+          
+          $(el).find('.set').each((i, detailEl) => {
+            const text = $(detailEl).text();
+            if (text.includes('Status')) {
+              status = text.replace('Status :', '').trim();
+            } else if (text.includes('Rating')) {
+              rating = text.replace('Rating :', '').trim();
+            }
+          });
+          
+          const id = url.split('/').filter(Boolean).pop();
+          
+          results.push({
+            id,
+            title,
+            image,
+            url,
+            genres,
+            status,
+            rating,
+            episodeCount: 0
+          });
+        }
+      });
+    }
     
     res.json(results);
   } catch (error) {
@@ -71,7 +127,12 @@ app.get('/api/anime/:id', async (req, res) => {
     const { id } = req.params;
     const animeUrl = `https://otakudesu.best/anime/${id}/`;
     
-    const { data } = await axios.get(animeUrl);
+    const { data } = await axios.get(animeUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+    
     const $ = cheerio.load(data);
     
     // Extract anime details
@@ -130,7 +191,12 @@ app.get('/api/stream', async (req, res) => {
   try {
     const { url } = req.query;
     
-    const { data } = await axios.get(url);
+    const { data } = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+    
     const $ = cheerio.load(data);
     
     // Extract streaming URL (this is a simplified example)
