@@ -431,6 +431,11 @@
     </footer>
 
     <script>
+        // API Base URL - akan diganti dengan URL Vercel setelah deploy
+        const API_BASE_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3001' 
+            : 'https://your-vercel-app.vercel.app';
+
         // DOM Elements
         const searchInput = document.getElementById('search-input');
         const searchButton = document.getElementById('search-button');
@@ -493,7 +498,6 @@
             showLoading();
             
             try {
-                // In a real implementation, this would call your server API
                 const searchResults = await fetchSearchResults(query);
                 displaySearchResults(searchResults);
             } catch (error) {
@@ -506,228 +510,34 @@
         
         // Fetch search results from the backend API
         async function fetchSearchResults(query) {
-            try {
-                // This would be your actual API endpoint in production
-                const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
-                
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                
-                return await response.json();
-            } catch (error) {
-                // Fallback to simulated data if API is not available
-                console.warn('API not available, using simulated data:', error);
-                return simulateSearchAPI(query);
+            const response = await fetch(`${API_BASE_URL}/api/search?query=${encodeURIComponent(query)}`);
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        }
-        
-        // Simulate API call (replace with actual API call in production)
-        async function simulateSearchAPI(query) {
-            // This is a simulation - in a real app, you would fetch from your backend API
             
-            // Sample data structure based on the HTML you provided for "Bad Girl"
-            const sampleData = {
-                "bad girl": [
-                    {
-                        id: 'bad-girl-sub-indo',
-                        title: 'Bad Girl',
-                        image: 'https://otakudesu.best/wp-content/uploads/2025/07/Bad-Girl.jpg',
-                        genres: ['Comedy', 'School'],
-                        status: 'Ongoing',
-                        rating: '6.91',
-                        episodeCount: 0, // Will be updated from detail
-                        url: 'https://otakudesu.best/anime/bad-girl-sub-indo/'
-                    },
-                    {
-                        id: 'ungirl-murder-sub-indo',
-                        title: 'Undead Girl Murder Farce',
-                        image: 'https://otakudesu.best/wp-content/uploads/2023/10/Undead-Girl-Murder-Farce-Sub-Indo.jpg',
-                        genres: ['Detective', 'Fantasy', 'Historical', 'Mystery', 'Supernatural', 'Vampire'],
-                        status: 'Completed',
-                        rating: '7.93',
-                        episodeCount: 13,
-                        url: 'https://otakudesu.best/anime/ungirl-murder-sub-indo/'
-                    },
-                    {
-                        id: 'school-fleet-subtitle-indonesia',
-                        title: 'High School Fleet BD',
-                        image: 'https://otakudesu.best/wp-content/uploads/2018/01/High-School-Fleet-Sub-Indo.jpg',
-                        genres: ['Action', 'Military', 'School'],
-                        status: 'Completed',
-                        rating: '7.33',
-                        episodeCount: 12,
-                        url: 'https://otakudesu.best/anime/school-fleet-subtitle-indonesia/'
-                    }
-                ],
-                "gotoubun no hanayome": [
-                    {
-                        id: 'gotobun-hanayome-subtitle-indonesia',
-                        title: 'Gotoubun no Hanayome',
-                        image: 'https://otakudesu.best/wp-content/uploads/2019/01/Gotoubun-no-Hanayome-Sub-Indo.jpg',
-                        genres: ['Comedy', 'Harem', 'Romance', 'School', 'Shounen'],
-                        status: 'Completed',
-                        rating: '7.67',
-                        episodeCount: 12,
-                        url: 'https://otakudesu.best/anime/gotobun-hanayome-subtitle-indonesia/'
-                    },
-                    {
-                        id: 'gotoubun-hanayome-season-2-sub-indo',
-                        title: 'Gotoubun no Hanayome Season 2',
-                        image: 'https://otakudesu.best/wp-content/uploads/2021/01/gotoubun-no-hanayome-s2.jpg',
-                        genres: ['Comedy', 'Harem', 'Romance', 'School', 'Shounen'],
-                        status: 'Completed',
-                        rating: '8.16',
-                        episodeCount: 12,
-                        url: 'https://otakudesu.best/anime/gotoubun-hanayome-season-2-sub-indo/'
-                    }
-                ]
-            };
-            
-            return new Promise(resolve => {
-                setTimeout(() => {
-                    // Find the best matching query
-                    const normalizedQuery = query.toLowerCase();
-                    let results = [];
-                    
-                    // Check for exact matches first
-                    if (sampleData[normalizedQuery]) {
-                        results = sampleData[normalizedQuery];
-                    } else {
-                        // Check for partial matches
-                        for (const key in sampleData) {
-                            if (normalizedQuery.includes(key) || key.includes(normalizedQuery)) {
-                                results = [...results, ...sampleData[key]];
-                            }
-                        }
-                    }
-                    
-                    // If no results found, return empty array
-                    resolve(results.length > 0 ? results : []);
-                }, 1000);
-            });
+            return await response.json();
         }
         
         async function fetchAnimeDetail(animeId) {
-            try {
-                // This would be your actual API endpoint in production
-                const response = await fetch(`/api/anime/${encodeURIComponent(animeId)}`);
-                
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                
-                return await response.json();
-            } catch (error) {
-                // Fallback to simulated data if API is not available
-                console.warn('API not available, using simulated data:', error);
-                return simulateAnimeDetailAPI(animeId);
-            }
-        }
-        
-        // Simulate API call for anime details
-        async function simulateAnimeDetailAPI(animeId) {
-            // Sample data based on anime IDs
-            const sampleDetails = {
-                'bad-girl-sub-indo': {
-                    id: 'bad-girl-sub-indo',
-                    title: 'Bad Girl',
-                    japanese: 'バッドガール',
-                    image: 'https://otakudesu.best/wp-content/uploads/2025/07/Bad-Girl.jpg',
-                    score: '6.91',
-                    producer: '-',
-                    type: 'TV',
-                    status: 'Ongoing',
-                    totalEpisodes: 0, // Ongoing, unknown total
-                    duration: '24 Menit',
-                    releaseDate: 'Jul 2025',
-                    studio: 'Unknown',
-                    genres: ['Comedy', 'School'],
-                    synopsis: 'Cerita tentang seorang gadis yang dianggap "bad girl" di sekolahnya, namun sebenarnya memiliki hati yang baik. Dia melalui berbagai petualangan dan tantangan dalam kehidupan sekolahnya.',
-                    episodes: [
-                        { number: 1, title: 'Episode 1', date: '20 Juli,2025', url: 'https://otakudesu.best/episode/bad-girl-episode-1-sub-indo/' }
-                    ]
-                },
-                'ungirl-murder-sub-indo': {
-                    id: 'ungirl-murder-sub-indo',
-                    title: 'Undead Girl Murder Farce',
-                    japanese: 'アンデッドガール・マーダーファルス',
-                    image: 'https://otakudesu.best/wp-content/uploads/2023/10/Undead-Girl-Murder-Farce-Sub-Indo.jpg',
-                    score: '7.93',
-                    producer: '-',
-                    type: 'TV',
-                    status: 'Completed',
-                    totalEpisodes: 13,
-                    duration: '24 Menit',
-                    releaseDate: 'Jul 2023',
-                    studio: 'Lapin Track',
-                    genres: ['Detective', 'Fantasy', 'Historical', 'Mystery', 'Supernatural', 'Vampire'],
-                    synopsis: 'Sebuah seri misteri yang mengikuti detektif yang menyelidiki kasus-kasus yang melibatkan makhluk supernatural di era Meiji.',
-                    episodes: [
-                        { number: 13, title: 'Episode 13 (End)', date: '28 September,2023', url: 'https://otakudesu.best/episode/undead-girl-murder-farce-episode-13-sub-indo/' },
-                        { number: 12, title: 'Episode 12', date: '21 September,2023', url: 'https://otakudesu.best/episode/undead-girl-murder-farce-episode-12-sub-indo/' },
-                        { number: 11, title: 'Episode 11', date: '14 September,2023', url: 'https://otakudesu.best/episode/undead-girl-murder-farce-episode-11-sub-indo/' },
-                        // Add more episodes as needed
-                    ]
-                },
-                'gotobun-hanayome-subtitle-indonesia': {
-                    id: 'gotobun-hanayome-subtitle-indonesia',
-                    title: 'Gotoubun no Hanayome',
-                    japanese: '五等分の花嫁',
-                    image: 'https://otakudesu.best/wp-content/uploads/2019/01/Gotoubun-no-Hanayome-Sub-Indo.jpg',
-                    score: '7.67',
-                    producer: '-',
-                    type: 'TV',
-                    status: 'Completed',
-                    totalEpisodes: 12,
-                    duration: '24 Menit',
-                    releaseDate: 'Jan 11, 2019',
-                    studio: 'Tezuka Productions',
-                    genres: ['Comedy', 'Harem', 'Romance', 'School', 'Shounen'],
-                    synopsis: 'Fuutarou Uesugi merupakan siswa cerdas namun memiliki hidup yang sulit. Fuutarou selalu menyendiri dan fokus terhadap belajar, tidak memiliki ibu serta teman, keluarganya dililit banyak hutang, bahkan ia dan adiknya seringkali merasa kelaparan. Oleh karena itu, kesempatan yang muncul di depannya tak akan ia lepaskan. Ia dimintai oleh seseorang untuk menjadi guru les dengan bayaran yang tinggi. Dan ternyata murid yang harus Fuutarou ajari satu sekolah dengan dirinya. Dan terlebih lagi, ia harus mengajar untuk kakak beradik kembar 5 yang memiliki sifat berbeda-beda, mereka tidak suka belajar dan memiliki nilai yang sangat rendah serta berkesempatan besar untuk tidak naik kelas. Sebagian dari mereka ada yang menolak untuk diajari bahkan mengusir Fuutarou. Hal tersebut membuat pekerjaan paruh waktunya menjadi rumit & sulit. Namun Fuutarou tak pantang menyerah, ia bersikeras untuk menjadi pengajar mereka karena dirinya sangat membutuhkan bayaran tersebut. Apa yang harus dia lakukan agar kelima gadis cantik tersebut dapat lulus? rencana apakah yang akan dilakukan oleh Fuutarou?',
-                    episodes: [
-                        { number: 12, title: 'Episode 12 (End)', date: '28 Maret,2019', url: 'https://otakudesu.best/episode/gth-episode-12-sub-indo/' },
-                        { number: 11, title: 'Episode 11', date: '21 Maret,2019', url: 'https://otakudesu.best/episode/gth-episode-11-sub-indo/' },
-                        { number: 10, title: 'Episode 10', date: '14 Maret,2019', url: 'https://otakudesu.best/episode/gth-episode-10-sub-indo/' },
-                        // Add more episodes as needed
-                    ]
-                }
-            };
+            const response = await fetch(`${API_BASE_URL}/api/anime/${encodeURIComponent(animeId)}`);
             
-            return new Promise(resolve => {
-                setTimeout(() => {
-                    // Return the anime detail or empty object if not found
-                    resolve(sampleDetails[animeId] || {});
-                }, 1000);
-            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            
+            return await response.json();
         }
         
         async function fetchStreamingUrl(episodeUrl) {
-            try {
-                // This would be your actual API endpoint in production
-                const response = await fetch(`/api/stream?url=${encodeURIComponent(episodeUrl)}`);
-                
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                
-                const data = await response.json();
-                return data.streamingUrl;
-            } catch (error) {
-                // Fallback to simulated data if API is not available
-                console.warn('API not available, using simulated data:', error);
-                return simulateStreamingAPI(episodeUrl);
+            const response = await fetch(`${API_BASE_URL}/api/stream?url=${encodeURIComponent(episodeUrl)}`);
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        }
-        
-        // Simulate API call for streaming URL
-        async function simulateStreamingAPI(episodeUrl) {
-            return new Promise(resolve => {
-                setTimeout(() => {
-                    // Return a mock streaming URL
-                    resolve('https://www.youtube.com/embed/dQw4w9WgXcQ'); // Placeholder
-                }, 500);
-            });
+            
+            const data = await response.json();
+            return data.streamingUrl;
         }
         
         function displaySearchResults(results) {
