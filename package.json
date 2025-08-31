@@ -1,23 +1,23 @@
 {
-  "name": "anime-stream-backend",
+  "name": "anime-stream-website",
   "version": "1.0.0",
-  "description": "Backend API for anime streaming website with Puppeteer",
+  "description": "Website streaming anime dengan bypass Cloudflare",
   "type": "module",
-  "main": "api/index.js",
   "scripts": {
-    "start": "node api/index.js",
-    "dev": "nodemon api/index.js"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
+    "vite": "^4.4.0",
     "express": "^4.18.2",
     "cors": "^2.8.5",
     "puppeteer-core": "^21.5.2",
-    "@sparticuz/chromium": "^116.0.1"
+    "@sparticuz/chromium": "^116.0.1",
+    "cloudscraper": "^4.6.0",
+    "jsdom": "^22.1.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
-  },
-  "engines": {
-    "node": ">=18"
+    "@vercel/node": "^1.15.0"
   }
 }
