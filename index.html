@@ -431,10 +431,8 @@
     </footer>
 
     <script>
-        // API Base URL - sesuaikan dengan URL server Anda
-        const API_BASE_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3001' 
-            : 'https://your-server.com';
+        // API Base URL - menggunakan backend yang sudah terdeploy
+        const API_BASE_URL = 'https://nime-steel.vercel.app';
 
         // DOM Elements
         const searchInput = document.getElementById('search-input');
@@ -709,6 +707,12 @@
         
         // Initialize with empty search results
         showHomePage();
+        
+        // Contoh pencarian otomatis untuk "Bad Girl"
+        setTimeout(() => {
+            searchInput.value = "Bad Girl";
+            performSearch();
+        }, 1000);
     </script>
 </body>
 </html>
