@@ -4,13 +4,16 @@
   "description": "API untuk website streaming anime",
   "main": "api/index.js",
   "scripts": {
-    "start": "node api/index.js"
+    "start": "node api/index.js",
+    "dev": "nodemon api/index.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "puppeteer": "^21.5.2",
     "cloudscraper": "^4.6.0",
-    "jsdom": "^22.1.0"
+    "jsdom": "^22.1.0",
+    "cors": "^2.8.5",
+    "node-cache": "^5.1.2"
   },
   "engines": {
     "node": ">=18.x"
