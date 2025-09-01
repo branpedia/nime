@@ -124,6 +124,21 @@
             margin-bottom: 25px;
         }
         
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #e94560;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #c53d54;
+        }
+        
         /* Section Titles */
         .section-title {
             font-size: 28px;
@@ -315,32 +330,12 @@
             }
         }
 
-        .scraping-info {
+        .api-info {
             background: #1a1a2e;
             padding: 15px;
             border-radius: 8px;
             margin: 20px 0;
             text-align: center;
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        
-        .status-cloudscraper {
-            background-color: #4CAF50;
-        }
-        
-        .status-puppeteer {
-            background-color: #2196F3;
-        }
-        
-        .status-fallback {
-            background-color: #FF9800;
         }
     </style>
 </head>
@@ -371,12 +366,13 @@
             <div class="hero-content">
                 <h1>Streaming Anime Subtitle Indonesia</h1>
                 <p>Nikmati koleksi anime terlengkap dengan kualitas terbaik dan subtitle Indonesia.</p>
+                <button class="btn" id="refresh-btn"><i class="fas fa-sync-alt"></i> Refresh Data</button>
             </div>
         </section>
 
-        <div class="scraping-info">
-            <h3>Status Scraping: <span id="scraping-status">Memulai...</span></h3>
-            <p id="scraping-method">Menggunakan Cloudscraper untuk mengambil data...</p>
+        <div class="api-info">
+            <h3>API Anime Ongoing</h3>
+            <p>Data diambil langsung dari OtakuDesu menggunakan API khusus</p>
         </div>
         
         <h2 class="section-title" id="ongoing"><i class="fas fa-fire"></i> Anime Ongoing</h2>
@@ -413,10 +409,12 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const ongoingAnime = document.getElementById('ongoing-anime');
-            const scrapingStatus = document.getElementById('scraping-status');
-            const scrapingMethod = document.getElementById('scraping-method');
+            const refreshBtn = document.getElementById('refresh-btn');
             
-            // Data fallback jika semua metode gagal
+            // API endpoint untuk ongoing anime
+            const API_URL = '/api/ongoing-anime';
+            
+            // Data fallback jika API gagal
             const fallbackAnimeData = [
                 {
                     id: "isekai-mokushiroku-mynoghra",
@@ -468,97 +466,37 @@
                 }
             ];
             
-            // Fungsi untuk update status scraping
-            function updateStatus(status, method) {
-                scrapingStatus.textContent = status;
-                scrapingMethod.innerHTML = method;
-            }
-            
-            // Fungsi utama untuk mengambil data anime
+            // Fungsi untuk mengambil data anime ongoing dari API
             async function fetchOngoingAnime() {
-                updateStatus("Memulai...", "Menggunakan Cloudscraper untuk mengambil data...");
-                
                 try {
-                    // Coba dengan Cloudscraper terlebih dahulu
-                    await fetchWithCloudscraper();
-                } catch (error) {
-                    console.error('Cloudscraper failed:', error);
+                    ongoingAnime.innerHTML = '<div class="loader"><i class="fas fa-spinner"></i><p>Memuat anime dari OtakuDesu...</p></div>';
                     
-                    // Jika Cloudscraper gagal, coba dengan Puppeteer
-                    try {
-                        updateStatus("Mencoba lagi...", "Cloudscraper gagal, mencoba dengan Puppeteer...");
-                        await fetchWithPuppeteer();
-                    } catch (puppeteerError) {
-                        console.error('Puppeteer failed:', puppeteerError);
-                        
-                        // Jika kedua metode gagal, gunakan data fallback
-                        updateStatus("Menggunakan data fallback", "Kedua metode scraping gagal, menampilkan data contoh...");
+                    const response = await fetch(API_URL, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        renderOngoingAnime(data.data);
+                    } else {
+                        throw new Error(data.error || 'Unknown error from API');
+                    }
+                } catch (error) {
+                    console.error('Error fetching anime data:', error);
+                    ongoingAnime.innerHTML = `<p class="error">Gagal memuat anime: ${error.message}. Menampilkan data contoh...</p>`;
+                    
+                    // Tampilkan data fallback setelah beberapa detik
+                    setTimeout(() => {
                         renderOngoingAnime(fallbackAnimeData);
-                    }
-                }
-            }
-            
-            // Fungsi untuk mengambil data dengan Cloudscraper
-            async function fetchWithCloudscraper() {
-                updateStatus("Memproses...", "<span class='status-indicator status-cloudscraper'></span> Menggunakan Cloudscraper...");
-                
-                ongoingAnime.innerHTML = '<div class="loader"><i class="fas fa-spinner"></i><p>Menggunakan Cloudscraper untuk mengambil data...</p></div>';
-                
-                try {
-                    // Gunakan API route yang akan dibuat di server
-                    const response = await fetch('/api/ongoing-anime', {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        updateStatus("Berhasil!", "<span class='status-indicator status-cloudscraper'></span> Data berhasil diambil menggunakan Cloudscraper");
-                        renderOngoingAnime(data.data);
-                    } else {
-                        throw new Error(data.error || 'Unknown error');
-                    }
-                } catch (error) {
-                    throw new Error(`Cloudscraper failed: ${error.message}`);
-                }
-            }
-            
-            // Fungsi untuk mengambil data dengan Puppeteer (fallback)
-            async function fetchWithPuppeteer() {
-                updateStatus("Memproses...", "<span class='status-indicator status-puppeteer'></span> Menggunakan Puppeteer...");
-                
-                ongoingAnime.innerHTML = '<div class="loader"><i class="fas fa-spinner'></i><p>Menggunakan Puppeteer untuk mengambil data...</p></div>';
-                
-                try {
-                    // Gunakan API route untuk Puppeteer
-                    const response = await fetch('/api/ongoing-anime-puppeteer', {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        updateStatus("Berhasil!", "<span class='status-indicator status-puppeteer'></span> Data berhasil diambil menggunakan Puppeteer");
-                        renderOngoingAnime(data.data);
-                    } else {
-                        throw new Error(data.error || 'Unknown error');
-                    }
-                } catch (error) {
-                    throw new Error(`Puppeteer failed: ${error.message}`);
+                    }, 2000);
                 }
             }
             
@@ -602,6 +540,11 @@
                 successMsg.innerHTML = `<p>Berhasil memuat ${animeList.length} anime!</p>`;
                 ongoingAnime.parentNode.insertBefore(successMsg, ongoingAnime.nextSibling);
             }
+            
+            // Event listener untuk tombol refresh
+            refreshBtn.addEventListener('click', function() {
+                fetchOngoingAnime();
+            });
             
             // Inisialisasi
             fetchOngoingAnime();
