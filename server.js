@@ -1,8 +1,8 @@
 const express = require('express');
+const cors = require('cors');
 const cloudscraper = require('cloudscraper');
 const puppeteer = require('puppeteer');
-const cors = require('cors');
-const cheerio = require('cheerio');
+const { JSDOM } = require('jsdom');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,115 +10,127 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-
-// Endpoint untuk ongoing anime
-app.get('/api/ongoing-anime', async (req, res) => {
-  try {
-    console.log('Mengambil data ongoing anime...');
-    
-    // Pertama coba dengan Cloudscraper
-    try {
-      const data = await fetchWithCloudscraper();
-      return res.json({ success: true, data: data });
-    } catch (cloudscraperError) {
-      console.log('Cloudscraper failed, trying Puppeteer...');
-      
-      // Jika Cloudscraper gagal, coba dengan Puppeteer
-      try {
-        const data = await fetchWithPuppeteer();
-        return res.json({ success: true, data: data });
-      } catch (puppeteerError) {
-        console.error('Both methods failed:', puppeteerError);
-        throw new Error('All scraping methods failed');
-      }
-    }
-  } catch (error) {
-    console.error('Error in API:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: error.message,
-      note: 'Server sedang mengalami masalah. Silakan coba lagi nanti.'
-    });
-  }
-});
-
-// Fungsi untuk mengambil data dengan Cloudscraper
-async function fetchWithCloudscraper() {
-  try {
-    const url = 'https://otakudesu.best/ongoing-anime/';
-    const html = await cloudscraper.get(url);
-    return parseAnimeData(html);
-  } catch (error) {
-    throw new Error(`Cloudscraper error: ${error.message}`);
-  }
-}
-
-// Fungsi untuk mengambil data dengan Puppeteer (fallback)
-async function fetchWithPuppeteer() {
-  let browser;
-  try {
-    browser = await puppeteer.launch({ 
-      args: ['--no-sandbox', '--disable-setuid-sandbox'] 
-    });
-    const page = await browser.newPage();
-    
-    // Set user agent untuk menghindari deteksi
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
-    
-    const url = 'https://otakudesu.best/ongoing-anime/';
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
-    
-    // Tunggu sampai konten dimuat
-    await page.waitForSelector('.venz > ul > li', { timeout: 10000 });
-    
-    // Ekstrak HTML
-    const html = await page.content();
-    
-    // Parse HTML untuk mengambil data anime
-    return parseAnimeData(html);
-  } catch (error) {
-    throw new Error(`Puppeteer error: ${error.message}`);
-  } finally {
-    if (browser) await browser.close();
-  }
-}
-
-// Fungsi untuk parsing data anime dari HTML
-function parseAnimeData(html) {
-  const animeList = [];
-  const $ = cheerio.load(html);
-  
-  $('.venz > ul > li').each((index, element) => {
-    const $el = $(element);
-    const title = $el.find('.jdlflm').text().trim();
-    const image = $el.find('img').attr('src');
-    const episode = $el.find('.epz').text().trim();
-    const day = $el.find('.epztipe').text().trim();
-    const url = $el.find('a').attr('href');
-    
-    if (title && image) {
-      // Ekstrak ID dari URL
-      const idMatch = url.match(/anime\/(.+?)\//);
-      const id = idMatch ? idMatch[1] : title.toLowerCase().replace(/\s+/g, '-');
-      
-      animeList.push({ id, title, image, episode, day, url });
-    }
-  });
-  
-  return animeList;
-}
-
-// Handle OPTIONS request for CORS
-app.options('/api/ongoing-anime', cors());
-
-// Serve static files
 app.use(express.static('public'));
 
-// Default route
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+// Fungsi untuk scraping dengan Cloudscraper
+async function scrapeWithCloudscraper(url) {
+    try {
+        const html = await cloudscraper.get(url);
+        const dom = new JSDOM(html);
+        const document = dom.window.document;
+        
+        return parseAnimeData(document);
+    } catch (error) {
+        console.error('Cloudscraper error:', error);
+        throw error;
+    }
+}
+
+// Fungsi untuk scraping dengan Puppeteer
+async function scrapeWithPuppeteer(url) {
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
+        
+        // Set user agent untuk menghindari blokir
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+        
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+        
+        // Tunggu sampai konten dimuat
+        await page.waitForSelector('.venz > ul > li', { timeout: 10000 });
+        
+        const html = await page.content();
+        const dom = new JSDOM(html);
+        const document = dom.window.document;
+        
+        await browser.close();
+        
+        return parseAnimeData(document);
+    } catch (error) {
+        if (browser) await browser.close();
+        console.error('Puppeteer error:', error);
+        throw error;
+    }
+}
+
+// Fungsi untuk parsing data anime
+function parseAnimeData(document) {
+    const animeList = [];
+    const items = document.querySelectorAll('.venz > ul > li');
+    
+    items.forEach(item => {
+        const title = item.querySelector('.jdlflm')?.textContent.trim() || '';
+        const image = item.querySelector('img')?.src || '';
+        const episode = item.querySelector('.epz')?.textContent.trim() || '';
+        const day = item.querySelector('.epztipe')?.textContent.trim() || '';
+        const url = item.querySelector('a')?.href || '';
+        
+        // Ekstrak ID dari URL
+        const idMatch = url.match(/anime\/(.+?)\//);
+        const id = idMatch ? idMatch[1] : '';
+        
+        animeList.push({ id, title, image, episode, day, url });
+    });
+    
+    // Cek pagination
+    const pagination = document.querySelector('.pagenavix');
+    let totalPages = 1;
+    let currentPage = 1;
+    
+    if (pagination) {
+        const currentPageElement = pagination.querySelector('.current');
+        currentPage = currentPageElement ? parseInt(currentPageElement.textContent) : 1;
+        
+        const pageLinks = pagination.querySelectorAll('.page-numbers');
+        if (pageLinks.length > 0) {
+            // Ambil angka terakhir dari pagination (biasanya angka sebelum "Berikutnya")
+            const lastPage = parseInt(pageLinks[pageLinks.length - 2]?.textContent) || 1;
+            totalPages = lastPage;
+        }
+    }
+    
+    return {
+        anime: animeList,
+        pagination: { totalPages, currentPage }
+    };
+}
+
+// Endpoint untuk scraping
+app.post('/api/scrape', async (req, res) => {
+    try {
+        const { method, url } = req.body;
+        
+        if (!url) {
+            return res.status(400).json({ success: false, error: 'URL is required' });
+        }
+        
+        let data;
+        
+        switch (method) {
+            case 'cloudscraper':
+                data = await scrapeWithCloudscraper(url);
+                break;
+            case 'puppeteer':
+                data = await scrapeWithPuppeteer(url);
+                break;
+            case 'puppeteer-core':
+                data = await scrapeWithPuppeteer(url);
+                break;
+            default:
+                return res.status(400).json({ success: false, error: 'Invalid method' });
+        }
+        
+        res.json({ success: true, data });
+    } catch (error) {
+        console.error('Scraping error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
