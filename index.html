@@ -330,12 +330,70 @@
             }
         }
 
-        .api-info {
+        .scraping-info {
             background: #1a1a2e;
             padding: 15px;
             border-radius: 8px;
             margin: 20px 0;
             text-align: center;
+        }
+        
+        .scraping-info h3 {
+            color: #e94560;
+            margin-bottom: 10px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .status-success {
+            background: #4CAF50;
+        }
+        
+        .status-warning {
+            background: #FF9800;
+        }
+        
+        .status-error {
+            background: #f44336;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            gap: 10px;
+        }
+        
+        .page-btn {
+            padding: 10px 15px;
+            background: #1a1a2e;
+            color: #f0f0f0;
+            border: 1px solid #e94560;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .page-btn:hover {
+            background: #e94560;
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .page-info {
+            padding: 10px 15px;
+            background: #1a1a2e;
+            border-radius: 4px;
+            border: 1px solid #2d2d4d;
         }
     </style>
 </head>
@@ -370,9 +428,9 @@
             </div>
         </section>
 
-        <div class="api-info">
-            <h3>API Anime Ongoing</h3>
-            <p>Data diambil langsung dari OtakuDesu menggunakan API khusus</p>
+        <div class="scraping-info">
+            <h3>Scraping OtakuDesu <span id="scraping-status" class="status-indicator status-warning">Loading...</span></h3>
+            <p>Data diambil langsung dari OtakuDesu menggunakan Cloudscraper & Puppeteer</p>
         </div>
         
         <h2 class="section-title" id="ongoing"><i class="fas fa-fire"></i> Anime Ongoing</h2>
@@ -381,6 +439,12 @@
                 <i class="fas fa-spinner"></i>
                 <p>Memuat anime dari OtakuDesu...</p>
             </div>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <button class="page-btn" id="prev-page" disabled><i class="fas fa-chevron-left"></i> Sebelumnya</button>
+            <span class="page-info" id="page-info">Halaman 1</span>
+            <button class="page-btn" id="next-page">Berikutnya <i class="fas fa-chevron-right"></i></button>
         </div>
     </main>
     
@@ -410,11 +474,15 @@
         document.addEventListener('DOMContentLoaded', function() {
             const ongoingAnime = document.getElementById('ongoing-anime');
             const refreshBtn = document.getElementById('refresh-btn');
+            const scrapingStatus = document.getElementById('scraping-status');
+            const prevPageBtn = document.getElementById('prev-page');
+            const nextPageBtn = document.getElementById('next-page');
+            const pageInfo = document.getElementById('page-info');
             
-            // API endpoint untuk ongoing anime
-            const API_URL = '/api/ongoing-anime';
+            let currentPage = 1;
+            let totalPages = 5; // Default, akan diupdate setelah scraping
             
-            // Data fallback jika API gagal
+            // Data fallback jika scraping gagal
             const fallbackAnimeData = [
                 {
                     id: "isekai-mokushiroku-mynoghra",
@@ -466,31 +534,128 @@
                 }
             ];
             
-            // Fungsi untuk mengambil data anime ongoing dari API
-            async function fetchOngoingAnime() {
+            // Fungsi untuk update status scraping
+            function updateScrapingStatus(status, message) {
+                scrapingStatus.textContent = message;
+                scrapingStatus.className = 'status-indicator';
+                
+                switch(status) {
+                    case 'success':
+                        scrapingStatus.classList.add('status-success');
+                        break;
+                    case 'warning':
+                        scrapingStatus.classList.add('status-warning');
+                        break;
+                    case 'error':
+                        scrapingStatus.classList.add('status-error');
+                        break;
+                }
+            }
+            
+            // Fungsi untuk update pagination
+            function updatePagination() {
+                pageInfo.textContent = `Halaman ${currentPage}`;
+                prevPageBtn.disabled = currentPage === 1;
+                nextPageBtn.disabled = currentPage === totalPages;
+            }
+            
+            // Fungsi untuk mengambil data anime ongoing dari OtakuDesu
+            async function fetchOngoingAnime(page = 1) {
                 try {
+                    updateScrapingStatus('warning', 'Memulai scraping...');
                     ongoingAnime.innerHTML = '<div class="loader"><i class="fas fa-spinner"></i><p>Memuat anime dari OtakuDesu...</p></div>';
                     
-                    const response = await fetch(API_URL, {
-                        method: 'GET',
+                    // URL yang akan di-scrape
+                    const url = page > 1 
+                        ? `https://otakudesu.best/ongoing-anime/page/${page}/` 
+                        : 'https://otakudesu.best/ongoing-anime/';
+                    
+                    // Coba cloudscraper dulu
+                    let response = await fetch('/api/scrape', {
+                        method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
-                        }
+                        },
+                        body: JSON.stringify({ 
+                            method: 'cloudscraper',
+                            url: url
+                        })
                     });
                     
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     
-                    const data = await response.json();
+                    let data = await response.json();
                     
                     if (data.success) {
-                        renderOngoingAnime(data.data);
-                    } else {
-                        throw new Error(data.error || 'Unknown error from API');
+                        updateScrapingStatus('success', 'Cloudscraper Berhasil');
+                        renderOngoingAnime(data.data.anime);
+                        totalPages = data.data.pagination.totalPages;
+                        updatePagination();
+                        return;
                     }
+                    
+                    // Jika cloudscraper gagal, coba puppeteer
+                    updateScrapingStatus('warning', 'Coba Puppeteer...');
+                    response = await fetch('/api/scrape', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            method: 'puppeteer',
+                            url: url
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    data = await response.json();
+                    
+                    if (data.success) {
+                        updateScrapingStatus('success', 'Puppeteer Berhasil');
+                        renderOngoingAnime(data.data.anime);
+                        totalPages = data.data.pagination.totalPages;
+                        updatePagination();
+                        return;
+                    }
+                    
+                    // Jika puppeteer gagal, coba puppeteer-core
+                    updateScrapingStatus('warning', 'Coba Puppeteer-core...');
+                    response = await fetch('/api/scrape', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            method: 'puppeteer-core',
+                            url: url
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    data = await response.json();
+                    
+                    if (data.success) {
+                        updateScrapingStatus('success', 'Puppeteer-core Berhasil');
+                        renderOngoingAnime(data.data.anime);
+                        totalPages = data.data.pagination.totalPages;
+                        updatePagination();
+                        return;
+                    }
+                    
+                    // Jika semua metode gagal
+                    throw new Error('Semua metode scraping gagal');
+                    
                 } catch (error) {
                     console.error('Error fetching anime data:', error);
+                    updateScrapingStatus('error', 'Scraping Gagal');
                     ongoingAnime.innerHTML = `<p class="error">Gagal memuat anime: ${error.message}. Menampilkan data contoh...</p>`;
                     
                     // Tampilkan data fallback setelah beberapa detik
@@ -543,11 +708,26 @@
             
             // Event listener untuk tombol refresh
             refreshBtn.addEventListener('click', function() {
-                fetchOngoingAnime();
+                fetchOngoingAnime(currentPage);
+            });
+            
+            // Event listener untuk pagination
+            prevPageBtn.addEventListener('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    fetchOngoingAnime(currentPage);
+                }
+            });
+            
+            nextPageBtn.addEventListener('click', function() {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    fetchOngoingAnime(currentPage);
+                }
             });
             
             // Inisialisasi
-            fetchOngoingAnime();
+            fetchOngoingAnime(currentPage);
         });
     </script>
 </body>
