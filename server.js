@@ -11,30 +11,52 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Endpoint untuk ongoing anime dengan Cloudscraper
+// Endpoint untuk ongoing anime
 app.get('/api/ongoing-anime', async (req, res) => {
   try {
-    console.log('Mengambil data dengan Cloudscraper...');
+    console.log('Mengambil data ongoing anime...');
     
-    const url = 'https://otakudesu.best/ongoing-anime/';
-    const html = await cloudscraper.get(url);
-    
-    // Parse HTML untuk mengambil data anime
-    const animeList = parseAnimeData(html);
-    
-    res.json({ success: true, data: animeList });
+    // Pertama coba dengan Cloudscraper
+    try {
+      const data = await fetchWithCloudscraper();
+      return res.json({ success: true, data: data });
+    } catch (cloudscraperError) {
+      console.log('Cloudscraper failed, trying Puppeteer...');
+      
+      // Jika Cloudscraper gagal, coba dengan Puppeteer
+      try {
+        const data = await fetchWithPuppeteer();
+        return res.json({ success: true, data: data });
+      } catch (puppeteerError) {
+        console.error('Both methods failed:', puppeteerError);
+        throw new Error('All scraping methods failed');
+      }
+    }
   } catch (error) {
-    console.error('Cloudscraper error:', error);
-    res.status(500).json({ success: false, error: error.message });
+    console.error('Error in API:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      note: 'Server sedang mengalami masalah. Silakan coba lagi nanti.'
+    });
   }
 });
 
-// Endpoint untuk ongoing anime dengan Puppeteer (fallback)
-app.get('/api/ongoing-anime-puppeteer', async (req, res) => {
+// Fungsi untuk mengambil data dengan Cloudscraper
+async function fetchWithCloudscraper() {
+  try {
+    const url = 'https://otakudesu.best/ongoing-anime/';
+    const html = await cloudscraper.get(url);
+    return parseAnimeData(html);
+  } catch (error) {
+    throw new Error(`Cloudscraper error: ${error.message}`);
+  }
+}
+
+// Fungsi untuk mengambil data dengan Puppeteer (fallback)
+async function fetchWithPuppeteer() {
   let browser;
   try {
-    console.log('Mengambil data dengan Puppeteer...');
-    
     browser = await puppeteer.launch({ 
       args: ['--no-sandbox', '--disable-setuid-sandbox'] 
     });
@@ -53,16 +75,13 @@ app.get('/api/ongoing-anime-puppeteer', async (req, res) => {
     const html = await page.content();
     
     // Parse HTML untuk mengambil data anime
-    const animeList = parseAnimeData(html);
-    
-    await browser.close();
-    res.json({ success: true, data: animeList });
+    return parseAnimeData(html);
   } catch (error) {
-    console.error('Puppeteer error:', error);
+    throw new Error(`Puppeteer error: ${error.message}`);
+  } finally {
     if (browser) await browser.close();
-    res.status(500).json({ success: false, error: error.message });
   }
-});
+}
 
 // Fungsi untuk parsing data anime dari HTML
 function parseAnimeData(html) {
@@ -91,10 +110,14 @@ function parseAnimeData(html) {
 
 // Handle OPTIONS request for CORS
 app.options('/api/ongoing-anime', cors());
-app.options('/api/ongoing-anime-puppeteer', cors());
 
 // Serve static files
 app.use(express.static('public'));
+
+// Default route
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/index.html');
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
