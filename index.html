@@ -54,35 +54,6 @@
             margin-right: 10px;
         }
         
-        .search-form {
-            display: flex;
-            width: 50%;
-        }
-        
-        .search-form input {
-            flex: 1;
-            padding: 12px 15px;
-            border: none;
-            border-radius: 4px 0 0 4px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            outline: none;
-        }
-        
-        .search-form button {
-            padding: 12px 20px;
-            background: #e94560;
-            color: white;
-            border: none;
-            border-radius: 0 4px 4px 0;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .search-form button:hover {
-            background: #c53d54;
-        }
-        
         /* Navigation */
         nav {
             background: #16213e;
@@ -109,7 +80,7 @@
             transition: background 0.3s;
         }
         
-        .nav-menu a:hover {
+        .nav-menu a:hover, .nav-menu a.active {
             background: rgba(233, 69, 96, 0.2);
         }
         
@@ -151,21 +122,6 @@
         .hero p {
             font-size: 18px;
             margin-bottom: 25px;
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 12px 25px;
-            background: #e94560;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: 500;
-            transition: background 0.3s;
-        }
-        
-        .btn:hover {
-            background: #c53d54;
         }
         
         /* Section Titles */
@@ -236,6 +192,7 @@
         
         .anime-info {
             padding: 15px;
+            text-align: center;
         }
         
         .anime-title {
@@ -274,134 +231,23 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            overflow-y: auto;
-        }
-        
-        .modal-content {
-            background: #1a1a2e;
-            margin: 50px auto;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 800px;
-            width: 90%;
-            position: relative;
-        }
-        
-        .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 24px;
+        /* Error Message */
+        .error {
             color: #e94560;
-            cursor: pointer;
-            background: none;
-            border: none;
-        }
-        
-        .anime-detail {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        @media (min-width: 768px) {
-            .anime-detail {
-                flex-direction: row;
-            }
-        }
-        
-        .anime-detail-img {
-            flex: 0 0 300px;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        .anime-detail-img img {
-            width: 100%;
-            height: auto;
-        }
-        
-        .anime-detail-info {
-            flex: 1;
-        }
-        
-        .anime-detail-title {
-            font-size: 28px;
-            margin-bottom: 15px;
-            color: #e94560;
-        }
-        
-        .anime-detail-meta {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .meta-item {
+            text-align: center;
+            padding: 20px;
             background: #16213e;
-            padding: 15px;
             border-radius: 8px;
+            margin: 20px 0;
         }
         
-        .meta-item h4 {
-            color: #e94560;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        
-        .meta-item p {
-            font-size: 16px;
-            font-weight: 500;
-        }
-        
-        .episode-list {
-            margin-top: 30px;
-        }
-        
-        .episode-item {
+        .success {
+            color: #4CAF50;
+            text-align: center;
+            padding: 10px;
             background: #16213e;
-            padding: 15px;
             border-radius: 8px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.3s;
-        }
-        
-        .episode-item:hover {
-            background: #1f2b4e;
-        }
-        
-        .episode-item a {
-            color: #f0f0f0;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .play-btn {
-            background: #e94560;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.3s;
-        }
-        
-        .play-btn:hover {
-            background: #c53d54;
+            margin: 10px 0;
         }
         
         /* Footer */
@@ -447,10 +293,6 @@
                 margin-bottom: 15px;
             }
             
-            .search-form {
-                width: 100%;
-            }
-            
             .nav-menu {
                 flex-wrap: wrap;
             }
@@ -471,14 +313,34 @@
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
                 gap: 15px;
             }
-            
-            .anime-detail {
-                flex-direction: column;
-            }
-            
-            .anime-detail-img {
-                flex: 0 0 auto;
-            }
+        }
+
+        .scraping-info {
+            background: #1a1a2e;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-cloudscraper {
+            background-color: #4CAF50;
+        }
+        
+        .status-puppeteer {
+            background-color: #2196F3;
+        }
+        
+        .status-fallback {
+            background-color: #FF9800;
         }
     </style>
 </head>
@@ -489,10 +351,6 @@
                 <a href="#" class="logo">
                     <i class="fas fa-play-circle"></i> AnimeStream
                 </a>
-                <form class="search-form" id="search-form">
-                    <input type="text" placeholder="Cari anime..." id="search-input">
-                    <button type="submit"><i class="fas fa-search"></i></button>
-                </form>
             </div>
         </div>
     </header>
@@ -501,10 +359,9 @@
         <div class="container">
             <ul class="nav-menu">
                 <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
-                <li><a href="#ongoing"><i class="fas fa-play-circle"></i> Ongoing</a></li>
-                <li><a href="#"><i class="fas fa-list"></i> Anime List</a></li>
+                <li><a href="#ongoing" class="active"><i class="fas fa-play-circle"></i> Ongoing</a></li>
+                <li><a href="#"><i class="fas fa-search"></i> Cari Anime</a></li>
                 <li><a href="#"><i class="fas fa-calendar"></i> Jadwal</a></li>
-                <li><a href="#"><i class="fas fa-tags"></i> Genre</a></li>
             </ul>
         </div>
     </nav>
@@ -514,40 +371,29 @@
             <div class="hero-content">
                 <h1>Streaming Anime Subtitle Indonesia</h1>
                 <p>Nikmati koleksi anime terlengkap dengan kualitas terbaik dan subtitle Indonesia.</p>
-                <a href="#ongoing" class="btn">Lihat Anime Terbaru</a>
             </div>
         </section>
+
+        <div class="scraping-info">
+            <h3>Status Scraping: <span id="scraping-status">Memulai...</span></h3>
+            <p id="scraping-method">Menggunakan Cloudscraper untuk mengambil data...</p>
+        </div>
         
         <h2 class="section-title" id="ongoing"><i class="fas fa-fire"></i> Anime Ongoing</h2>
         <div class="anime-grid" id="ongoing-anime">
             <div class="loader">
                 <i class="fas fa-spinner"></i>
-                <p>Memuat anime...</p>
+                <p>Memuat anime dari OtakuDesu...</p>
             </div>
-        </div>
-        
-        <h2 class="section-title"><i class="fas fa-search"></i> Hasil Pencarian</h2>
-        <div class="anime-grid" id="search-results">
-            <p class="no-results">Gunakan form pencarian di atas untuk mencari anime.</p>
         </div>
     </main>
-    
-    <!-- Modal untuk Detail Anime -->
-    <div class="modal" id="anime-modal">
-        <div class="modal-content">
-            <button class="close-modal" id="close-modal">&times;</button>
-            <div class="anime-detail" id="anime-detail">
-                <!-- Konten akan diisi oleh JavaScript -->
-            </div>
-        </div>
-    </div>
     
     <footer>
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
                     <h3>Tentang Kami</h3>
-                    <p>AnimeStream menyediakan layanan streaming anime dengan subtitle Indonesia. Website ini tidak menyimpan file video apapun dan hanya mengambil data dari sumber eksternal.</p>
+                    <p>AnimeStream menyediakan layanan streaming anime dengan subtitle Indonesia. Website ini mengambil data langsung dari OtakuDesu.</p>
                 </div>
                 <div class="footer-section">
                     <h3>Disclaimer</h3>
@@ -566,330 +412,199 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const searchForm = document.getElementById('search-form');
-            const searchInput = document.getElementById('search-input');
             const ongoingAnime = document.getElementById('ongoing-anime');
-            const searchResults = document.getElementById('search-results');
-            const animeModal = document.getElementById('anime-modal');
-            const closeModal = document.getElementById('close-modal');
-            const animeDetail = document.getElementById('anime-detail');
+            const scrapingStatus = document.getElementById('scraping-status');
+            const scrapingMethod = document.getElementById('scraping-method');
             
-            // API Base URL (ganti dengan URL API Anda di Vercel)
-            const API_BASE_URL = 'https://your-vercel-app.vercel.app/api';
-            
-            // Fungsi untuk memuat anime ongoing
-            async function loadOngoingAnime() {
-                try {
-                    ongoingAnime.innerHTML = '<div class="loader"><i class="fas fa-spinner"></i><p>Memuat anime...</p></div>';
-                    
-                    // Simulasi API call (dalam implementasi nyata, ganti dengan fetch ke API Anda)
-                    const response = await simulateApiCall('/ongoing', ongoingAnimeData);
-                    
-                    renderOngoingAnime(response.data);
-                } catch (error) {
-                    ongoingAnime.innerHTML = `<p class="error">Gagal memuat anime: ${error.message}</p>`;
-                }
-            }
-            
-            // Fungsi untuk mencari anime
-            async function searchAnime(query) {
-                try {
-                    searchResults.innerHTML = '<div class="loader"><i class="fas fa-spinner"></i><p>Mencari anime...</p></div>';
-                    
-                    // Simulasi API call (dalam implementasi nyata, ganti dengan fetch ke API Anda)
-                    const response = await simulateApiCall('/search', searchAnimeData(query));
-                    
-                    renderSearchResults(response.data);
-                } catch (error) {
-                    searchResults.innerHTML = `<p class="error">Gagal mencari anime: ${error.message}</p>`;
-                }
-            }
-            
-            // Fungsi untuk mendapatkan detail anime
-            async function getAnimeDetail(animeId) {
-                try {
-                    // Simulasi API call (dalam implementasi nyata, ganti dengan fetch ke API Anda)
-                    const response = await simulateApiCall(`/anime/${animeId}`, animeDetailData(animeId));
-                    
-                    showAnimeDetail(response.data);
-                } catch (error) {
-                    alert(`Gagal memuat detail anime: ${error.message}`);
-                }
-            }
-            
-            // Simulasi API call (untuk demonstrasi)
-            function simulateApiCall(endpoint, data) {
-                return new Promise((resolve) => {
-                    setTimeout(() => {
-                        console.log(`API Call: ${endpoint}`);
-                        resolve({ success: true, data });
-                    }, 1000);
-                });
-            }
-            
-            // Data simulasi untuk anime ongoing
-            const ongoingAnimeData = [
+            // Data fallback jika semua metode gagal
+            const fallbackAnimeData = [
                 {
-                    id: 1,
+                    id: "isekai-mokushiroku-mynoghra",
                     title: "Isekai Mokushiroku Mynoghra",
                     image: "https://otakudesu.best/wp-content/uploads/2025/07/Isekai-Mokushiroku-Mynoghra.jpg",
                     episode: "Episode 9",
                     day: "Minggu",
-                    rating: "7.5",
+                    url: "https://otakudesu.best/anime/isekai-mokushiroku-mynoghra-subtitle-indonesia/"
                 },
                 {
-                    id: 2,
+                    id: "busamen-gachi-fighter",
                     title: "Busamen Gachi Fighter",
                     image: "https://otakudesu.best/wp-content/uploads/2025/07/Busamen-Gachi-Fighter.jpg",
                     episode: "Episode 9",
                     day: "Minggu",
-                    rating: "7.8",
+                    url: "https://otakudesu.best/anime/busamen-gachi-fighter-sub-indo/"
                 },
                 {
-                    id: 3,
+                    id: "gachiakuta",
                     title: "Gachiakuta",
                     image: "https://otakudesu.best/wp-content/uploads/2025/07/Gachiakuta.jpg",
                     episode: "Episode 8",
                     day: "Minggu",
-                    rating: "8.2",
+                    url: "https://otakudesu.best/anime/gachiakuta-sub-indo/"
                 },
                 {
-                    id: 4,
+                    id: "arknights-rise-from-ember",
                     title: "Arknights: Rise from Ember",
                     image: "https://otakudesu.best/wp-content/uploads/2025/07/149462.jpg",
                     episode: "Episode 9",
                     day: "Sabtu",
-                    rating: "8.0",
+                    url: "https://otakudesu.best/anime/arknights-rise-from-ember-sub-indo/"
                 },
                 {
-                    id: 5,
+                    id: "witch-watch",
                     title: "Witch Watch",
                     image: "https://otakudesu.best/wp-content/uploads/2025/04/148017.jpg",
                     episode: "Episode 22",
                     day: "Minggu",
-                    rating: "7.9",
+                    url: "https://otakudesu.best/anime/wch-watch-sub-indo/"
                 },
                 {
-                    id: 6,
+                    id: "bad-girl",
                     title: "Bad Girl",
                     image: "https://otakudesu.best/wp-content/uploads/2025/07/Bad-Girl.jpg",
                     episode: "Episode 9",
                     day: "Minggu",
-                    rating: "6.9",
+                    url: "https://otakudesu.best/anime/bad-girl-sub-indo/"
                 }
             ];
             
-            // Data simulasi untuk pencarian anime
-            function searchAnimeData(query) {
-                const searchData = [
-                    {
-                        id: 6,
-                        title: "Bad Girl Subtitle Indonesia",
-                        image: "https://otakudesu.best/wp-content/uploads/2025/07/Bad-Girl.jpg",
-                        genres: ["Comedy", "School"],
-                        status: "Ongoing",
-                        rating: "6.91",
-                    },
-                    {
-                        id: 7,
-                        title: "Undead Girl Murder Farce",
-                        image: "https://otakudesu.best/wp-content/uploads/2023/10/Undead-Girl-Murder-Farce-Sub-Indo.jpg",
-                        genres: ["Detective", "Fantasy", "Mystery"],
-                        status: "Completed",
-                        rating: "7.93",
-                    },
-                    {
-                        id: 8,
-                        title: "High School Fleet",
-                        image: "https://otakudesu.best/wp-content/uploads/2018/01/High-School-Fleet-Sub-Indo.jpg",
-                        genres: ["Action", "Military", "School"],
-                        status: "Completed",
-                        rating: "7.33",
-                    }
-                ];
-                
-                return searchData.filter(anime => 
-                    anime.title.toLowerCase().includes(query.toLowerCase())
-                );
+            // Fungsi untuk update status scraping
+            function updateStatus(status, method) {
+                scrapingStatus.textContent = status;
+                scrapingMethod.innerHTML = method;
             }
             
-            // Data simulasi untuk detail anime
-            function animeDetailData(animeId) {
-                const details = {
-                    1: {
-                        title: "Isekai Mokushiroku Mynoghra",
-                        image: "https://otakudesu.best/wp-content/uploads/2025/07/Isekai-Mokushiroku-Mynoghra.jpg",
-                        synopsis: "Cerita dimulai ketika Takuto Ira, seorang penggemar game strategi, tiba-tiba terbangun di dunia game favoritnya. Dia sekarang adalah pemimpin bangsa Mynoghra yang jahat, dan harus menggunakan pengetahuannya tentang game untuk bertahan hidup di dunia yang berbahaya ini.",
-                        genres: ["Fantasy", "Isekai", "Strategy"],
-                        status: "Ongoing",
-                        rating: "7.5",
-                        total_episodes: 9,
-                        day: "Minggu",
-                        episodes: [
-                            { number: 9, title: "Pertempuran Terakhir", date: "01 Sep 2023" },
-                            { number: 8, title: "Kebangkitan Raja Iblis", date: "25 Agu 2023" },
-                            { number: 7, title: "Persiapan Perang", date: "18 Agu 2023" },
-                            { number: 6, title: "Sekutu Baru", date: "11 Agu 2023" },
-                            { number: 5, title: "Pengkhianatan", date: "04 Agu 2023" },
-                        ]
-                    },
-                    6: {
-                        title: "Bad Girl",
-                        image: "https://otakudesu.best/wp-content/uploads/2025/07/Bad-Girl.jpg",
-                        synopsis: "Aoi adalah siswi SMA yang dikenal sebagai 'bad girl' karena penampilannya yang menyeramkan dan sifatnya yang tertutup. Namun, di balik penampilannya yang menakutkan, dia sebenarnya adalah gadis yang baik hati dan pemalu. Ikuti kisahnya saat dia berusaha mengubah citranya dan menemukan teman-teman sejati.",
-                        genres: ["Comedy", "School", "Slice of Life"],
-                        status: "Ongoing",
-                        rating: "6.91",
-                        total_episodes: 9,
-                        day: "Minggu",
-                        episodes: [
-                            { number: 9, title: "Festival Budaya", date: "31 Agu 2023" },
-                            { number: 8, title: "Perasaan yang Terungkap", date: "24 Agu 2023" },
-                            { number: 7, title: "Pertemuan dengan Masa Lalu", date: "17 Agu 2023" },
-                            { number: 6, title: "Ujian Midterm", date: "10 Agu 2023" },
-                            { number: 5, title: "Liburan Musim Panas", date: "03 Agu 2023" },
-                        ]
-                    }
-                };
+            // Fungsi utama untuk mengambil data anime
+            async function fetchOngoingAnime() {
+                updateStatus("Memulai...", "Menggunakan Cloudscraper untuk mengambil data...");
                 
-                return details[animeId] || details[1];
+                try {
+                    // Coba dengan Cloudscraper terlebih dahulu
+                    await fetchWithCloudscraper();
+                } catch (error) {
+                    console.error('Cloudscraper failed:', error);
+                    
+                    // Jika Cloudscraper gagal, coba dengan Puppeteer
+                    try {
+                        updateStatus("Mencoba lagi...", "Cloudscraper gagal, mencoba dengan Puppeteer...");
+                        await fetchWithPuppeteer();
+                    } catch (puppeteerError) {
+                        console.error('Puppeteer failed:', puppeteerError);
+                        
+                        // Jika kedua metode gagal, gunakan data fallback
+                        updateStatus("Menggunakan data fallback", "Kedua metode scraping gagal, menampilkan data contoh...");
+                        renderOngoingAnime(fallbackAnimeData);
+                    }
+                }
+            }
+            
+            // Fungsi untuk mengambil data dengan Cloudscraper
+            async function fetchWithCloudscraper() {
+                updateStatus("Memproses...", "<span class='status-indicator status-cloudscraper'></span> Menggunakan Cloudscraper...");
+                
+                ongoingAnime.innerHTML = '<div class="loader"><i class="fas fa-spinner"></i><p>Menggunakan Cloudscraper untuk mengambil data...</p></div>';
+                
+                try {
+                    // Gunakan API route yang akan dibuat di server
+                    const response = await fetch('/api/ongoing-anime', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        updateStatus("Berhasil!", "<span class='status-indicator status-cloudscraper'></span> Data berhasil diambil menggunakan Cloudscraper");
+                        renderOngoingAnime(data.data);
+                    } else {
+                        throw new Error(data.error || 'Unknown error');
+                    }
+                } catch (error) {
+                    throw new Error(`Cloudscraper failed: ${error.message}`);
+                }
+            }
+            
+            // Fungsi untuk mengambil data dengan Puppeteer (fallback)
+            async function fetchWithPuppeteer() {
+                updateStatus("Memproses...", "<span class='status-indicator status-puppeteer'></span> Menggunakan Puppeteer...");
+                
+                ongoingAnime.innerHTML = '<div class="loader"><i class="fas fa-spinner'></i><p>Menggunakan Puppeteer untuk mengambil data...</p></div>';
+                
+                try {
+                    // Gunakan API route untuk Puppeteer
+                    const response = await fetch('/api/ongoing-anime-puppeteer', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        updateStatus("Berhasil!", "<span class='status-indicator status-puppeteer'></span> Data berhasil diambil menggunakan Puppeteer");
+                        renderOngoingAnime(data.data);
+                    } else {
+                        throw new Error(data.error || 'Unknown error');
+                    }
+                } catch (error) {
+                    throw new Error(`Puppeteer failed: ${error.message}`);
+                }
             }
             
             // Render ongoing anime
             function renderOngoingAnime(animeList) {
                 ongoingAnime.innerHTML = '';
                 
+                if (animeList.length === 0) {
+                    ongoingAnime.innerHTML = '<p class="no-results">Tidak ada anime ongoing ditemukan.</p>';
+                    return;
+                }
+                
                 animeList.forEach(anime => {
                     const animeCard = document.createElement('div');
                     animeCard.className = 'anime-card';
                     animeCard.innerHTML = `
                         <div class="anime-thumb">
-                            <img src="${anime.image}" alt="${anime.title}">
+                            <img src="${anime.image}" alt="${anime.title}" onerror="this.src='https://via.placeholder.com/200x280/1a1a2e/e94560?text=Gambar+Tidak+Tersedia'">
                             <div class="episode-badge">${anime.episode}</div>
                         </div>
                         <div class="anime-info">
                             <h3 class="anime-title">${anime.title}</h3>
                             <div class="anime-details">
                                 <span><i class="far fa-calendar-alt"></i> ${anime.day}</span>
-                                <span><i class="fas fa-star"></i> ${anime.rating}</span>
+                                <span><i class="fas fa-play-circle"></i> ${anime.episode}</span>
                             </div>
                         </div>
                     `;
                     
                     animeCard.addEventListener('click', () => {
-                        getAnimeDetail(anime.id);
+                        // Redirect ke halaman detail anime di OtakuDesu
+                        window.open(anime.url, '_blank');
                     });
                     
                     ongoingAnime.appendChild(animeCard);
                 });
+
+                // Tampilkan pesan sukses
+                const successMsg = document.createElement('div');
+                successMsg.className = 'success';
+                successMsg.innerHTML = `<p>Berhasil memuat ${animeList.length} anime!</p>`;
+                ongoingAnime.parentNode.insertBefore(successMsg, ongoingAnime.nextSibling);
             }
-            
-            // Render hasil pencarian
-            function renderSearchResults(results) {
-                searchResults.innerHTML = '';
-                
-                if (results.length === 0) {
-                    searchResults.innerHTML = '<p class="no-results">Tidak ada hasil ditemukan.</p>';
-                    return;
-                }
-                
-                results.forEach(anime => {
-                    const animeCard = document.createElement('div');
-                    animeCard.className = 'anime-card';
-                    animeCard.innerHTML = `
-                        <div class="anime-thumb">
-                            <img src="${anime.image}" alt="${anime.title}">
-                        </div>
-                        <div class="anime-info">
-                            <h3 class="anime-title">${anime.title}</h3>
-                            <div class="anime-details">
-                                <p><b>Genres</b>: ${anime.genres.join(', ')}</p>
-                                <p><b>Status</b>: ${anime.status}</p>
-                                <p><b>Rating</b>: ${anime.rating}</p>
-                            </div>
-                        </div>
-                    `;
-                    
-                    animeCard.addEventListener('click', () => {
-                        getAnimeDetail(anime.id);
-                    });
-                    
-                    searchResults.appendChild(animeCard);
-                });
-            }
-            
-            // Tampilkan detail anime
-            function showAnimeDetail(anime) {
-                animeDetail.innerHTML = `
-                    <div class="anime-detail-img">
-                        <img src="${anime.image}" alt="${anime.title}">
-                    </div>
-                    <div class="anime-detail-info">
-                        <h2 class="anime-detail-title">${anime.title}</h2>
-                        <div class="anime-detail-meta">
-                            <div class="meta-item">
-                                <h4>Status</h4>
-                                <p>${anime.status}</p>
-                            </div>
-                            <div class="meta-item">
-                                <h4>Rating</h4>
-                                <p>${anime.rating}</p>
-                            </div>
-                            <div class="meta-item">
-                                <h4>Hari Tayang</h4>
-                                <p>${anime.day}</p>
-                            </div>
-                            <div class="meta-item">
-                                <h4>Total Episode</h4>
-                                <p>${anime.total_episodes}</p>
-                            </div>
-                        </div>
-                        <div class="meta-item">
-                            <h4>Sinopsis</h4>
-                            <p>${anime.synopsis}</p>
-                        </div>
-                        <div class="meta-item">
-                            <h4>Genre</h4>
-                            <p>${anime.genres.join(', ')}</p>
-                        </div>
-                        <div class="episode-list">
-                            <h3>Episode List</h3>
-                            ${anime.episodes.map(ep => `
-                                <div class="episode-item">
-                                    <a href="#">${ep.number} - ${ep.title}</a>
-                                    <span>${ep.date}</span>
-                                    <a href="#" class="play-btn"><i class="fas fa-play"></i> Play</a>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-                
-                animeModal.style.display = 'block';
-            }
-            
-            // Event listeners
-            searchForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const query = searchInput.value.trim();
-                
-                if (query === '') return;
-                
-                searchAnime(query);
-            });
-            
-            closeModal.addEventListener('click', function() {
-                animeModal.style.display = 'none';
-            });
-            
-            window.addEventListener('click', function(e) {
-                if (e.target === animeModal) {
-                    animeModal.style.display = 'none';
-                }
-            });
             
             // Inisialisasi
-            loadOngoingAnime();
+            fetchOngoingAnime();
         });
     </script>
 </body>
